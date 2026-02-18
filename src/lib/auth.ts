@@ -6,7 +6,7 @@ import connectToDb from './db';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-export async function getUserFromToken(req: NextRequest) {
+export const getUserFromToken = async (req: NextRequest) => {
     try {
         const token = req.cookies.get('token')?.value || req.headers.get('authorization')?.split(' ')[1];
         if (!token) return null;
@@ -18,9 +18,9 @@ export async function getUserFromToken(req: NextRequest) {
     } catch (error) {
         return null;
     }
-}
+};
 
-export async function getCaptainFromToken(req: NextRequest) {
+export const getCaptainFromToken = async (req: NextRequest) => {
     try {
         const token = req.cookies.get('token')?.value || req.headers.get('authorization')?.split(' ')[1];
         if (!token) return null;
@@ -32,4 +32,12 @@ export async function getCaptainFromToken(req: NextRequest) {
     } catch (error) {
         return null;
     }
-}
+};
+
+export const verifyJwtToken = (token: string) => {
+    try {
+        return jwt.verify(token, JWT_SECRET) as any;
+    } catch (error) {
+        return null;
+    }
+};

@@ -57,13 +57,17 @@ export function generateOtp(num: number) {
 }
 
 export async function createRide({
-    user, pickup, destination, vehicleType, isFemaleOnly, waitAtDestination
+    user, pickup, destination, pickupLocation, destinationLocation, vehicleType, isFemaleOnly, waitAtDestination
 }: any) {
     if (!user || !pickup || !destination || !vehicleType) {
         throw new Error('All fields are required');
     }
 
-    const fareData = await getFare(pickup, destination, user);
+    // Use coordinates for fare calculation if available for better accuracy
+    const farePickup = pickupLocation ? `${pickupLocation.ltd},${pickupLocation.lng}` : pickup;
+    const fareDestination = destinationLocation ? `${destinationLocation.ltd},${destinationLocation.lng}` : destination;
+
+    const fareData = await getFare(farePickup, fareDestination, user);
 
     const activePass = await Pass.findOne({
         user,
@@ -75,8 +79,10 @@ export async function createRide({
 
     const ride = await Ride.create({
         user,
-        pickup,
-        destination,
+        pickup, // Human readable address string
+        destination, // Human readable address string
+        pickupLocation, // Coordinates for map/routing
+        destinationLocation, // Coordinates for map/routing
         otp: generateOtp(4),
         fare: (fareData.fares as any)[vehicleType],
         passUsed: !!activePass,

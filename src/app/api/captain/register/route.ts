@@ -8,10 +8,23 @@ export async function POST(req: Request) {
     try {
         await connectToDb();
         const body = await req.json();
-        const { fullname, email, password, vehicle, gender, referralCode, location } = body;
+        const { fullname, email, password, vehicle, referralCode, location } = body;
+        let { gender } = body;
 
-        if (!fullname?.firstname || !email || !password || password.length < 6 || !vehicle?.color || !vehicle?.plate || !vehicle?.capacity || !vehicle?.vehicleType || !gender) {
+        // Basic validation - making gender and capacity optional with defaults
+        if (!fullname?.firstname || !email || !password || password.length < 6 || !vehicle?.color || !vehicle?.plate || !vehicle?.vehicleType) {
             return NextResponse.json({ message: 'Invalid input data' }, { status: 400 });
+        }
+
+        // Set default gender if missing
+        if (!gender) gender = 'others';
+
+        // Set default capacity based on vehicle type if missing
+        let capacity = vehicle.capacity;
+        if (!capacity) {
+            if (vehicle.vehicleType === 'moto') capacity = 1;
+            else if (vehicle.vehicleType === 'auto') capacity = 3;
+            else capacity = 4; // car
         }
 
         const isCaptainAlready = await Captain.findOne({ email });
@@ -28,7 +41,7 @@ export async function POST(req: Request) {
             password: hashedPassword,
             color: vehicle.color,
             plate: vehicle.plate,
-            capacity: vehicle.capacity,
+            capacity: capacity, // Use the variable with default logic
             vehicleType: vehicle.vehicleType,
             ltd: location?.ltd || 0,
             lng: location?.lng || 0,

@@ -62,6 +62,22 @@ const rideSchema = new Schema({
     passUsed: {
         type: Boolean,
         default: false,
+    },
+    pickupLocation: {
+        ltd: {
+            type: Number,
+        },
+        lng: {
+            type: Number,
+        }
+    },
+    destinationLocation: {
+        ltd: {
+            type: Number,
+        },
+        lng: {
+            type: Number,
+        }
     }
 }, {
     timestamps: true
