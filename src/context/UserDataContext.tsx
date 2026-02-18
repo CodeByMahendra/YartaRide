@@ -6,9 +6,9 @@ export const UserDataContext = createContext<any>(null);
 export const UserDataProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState({
         email: '',
-        fullName: {
-            firstName: '',
-            lastName: ''
+        fullname: {
+            firstname: '',
+            lastname: ''
         }
     });
 

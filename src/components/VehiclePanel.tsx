@@ -46,28 +46,28 @@ const VehiclePanel = ({ setVehiclePanel, setConfirmRidePanel, selectVehicle, far
     ];
 
     return (
-        <div className="flex flex-col h-full bg-white">
-            <div className="flex items-center justify-between mb-10">
+        <div className="flex flex-col flex-1 min-h-0 p-4 md:p-5">
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h3 className='text-3xl font-black text-slate-900 tracking-tighter'>Fleet.</h3>
-                    <div className="flex items-center gap-3 mt-2">
-                        <div className="flex items-center gap-1 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
-                            <Zap className="w-3 h-3 text-indigo-600 fill-indigo-600" />
-                            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{fare?.duration?.text}</span>
+                    <h3 className='text-xl font-black text-slate-900 tracking-tighter'>Fleet.</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center gap-1 bg-indigo-50 px-1.5 py-0.5 rounded-full border border-indigo-100">
+                            <Zap className="w-2.5 h-2.5 text-indigo-600 fill-indigo-600" />
+                            <span className="text-[8px] font-black text-indigo-600 uppercase tracking-widest">{fare?.duration?.text}</span>
                         </div>
-                        <span className="text-slate-300 text-xs">•</span>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{fare?.distance?.text} Total Trip</span>
+                        <span className="text-slate-300 text-[10px]">•</span>
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">{fare?.distance?.text} Trip</span>
                     </div>
                 </div>
                 <button
                     onClick={() => setVehiclePanel(false)}
-                    className="p-3 bg-slate-100 rounded-[1.2rem] hover:bg-slate-900 hover:text-white transition-all shadow-lg active:scale-95"
+                    className="p-2.5 bg-slate-100 rounded-xl hover:bg-slate-900 hover:text-white transition-all active:scale-95"
                 >
-                    <ChevronRight className="w-6 h-6 rotate-90" />
+                    <ChevronRight className="w-5 h-5 rotate-90" />
                 </button>
             </div>
 
-            <div className="space-y-4 max-h-[450px] overflow-y-auto no-scrollbar pb-8">
+            <div className="space-y-4 flex-1 min-h-0 overflow-y-auto no-scrollbar pb-6">
                 {vehicles.map((v, idx) => (
                     <motion.div
                         key={v.id}
@@ -78,49 +78,48 @@ const VehiclePanel = ({ setVehiclePanel, setConfirmRidePanel, selectVehicle, far
                             setConfirmRidePanel(true);
                             selectVehicle(v.id);
                         }}
-                        className='group relative flex items-center justify-between p-6 bg-slate-50 border-2 border-transparent hover:border-indigo-600 hover:bg-white rounded-[2.5rem] cursor-pointer transition-all shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10'
+                        className='group relative flex items-center justify-between p-4 bg-slate-50 border-2 border-transparent hover:border-indigo-600 hover:bg-white rounded-[1.5rem] cursor-pointer transition-all shadow-sm'
                     >
                         {v.tag && (
-                            <div className={`absolute -top-2 left-8 px-4 py-1.5 ${v.color || 'bg-slate-900'} text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl shadow-indigo-100 z-10`}>
+                            <div className={`absolute -top-2 left-6 px-3 py-1 ${v.color || 'bg-slate-900'} text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg z-10`}>
                                 {v.tag}
                             </div>
                         )}
 
-                        <div className="flex items-center gap-6">
-                            <div className="w-24 h-18 flex items-center justify-center p-3 rounded-3xl bg-white shadow-sm border border-slate-100 group-hover:shadow-xl transition-all relative overflow-hidden">
+                        <div className="flex items-center gap-4">
+                            <div className="w-16 h-12 flex items-center justify-center p-2 rounded-xl bg-white shadow-sm border border-slate-100 transition-all relative overflow-hidden">
                                 <img className='max-h-full max-w-full object-contain relative z-10' src={v.image} alt={v.name} />
-                                <div className="absolute inset-0 bg-gradient-to-tr from-slate-50 to-white opacity-50"></div>
                             </div>
                             <div>
-                                <h4 className='font-black text-xl text-slate-900 flex items-center gap-2 tracking-tight'>
+                                <h4 className='font-black text-lg text-slate-900 flex items-center gap-1.5 tracking-tight'>
                                     {v.name}
                                 </h4>
-                                <div className="flex items-center gap-3 mt-1.5">
-                                    <span className='flex items-center gap-1 text-[10px] text-slate-400 font-black uppercase tracking-widest'>
-                                        <User className="w-3 h-3" /> {v.capacity} Seats
+                                <div className="flex items-center gap-2 mt-0.5">
+                                    <span className='flex items-center gap-1 text-[8px] text-slate-400 font-black uppercase tracking-widest'>
+                                        <User className="w-2.5 h-2.5" /> {v.capacity}
                                     </span>
                                     <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                                    <span className='flex items-center gap-1 text-[10px] text-emerald-500 font-black uppercase tracking-widest'>
-                                        <Timer className="w-3 h-3" /> {v.eta} ETA
+                                    <span className='flex items-center gap-1 text-[8px] text-emerald-500 font-black uppercase tracking-widest'>
+                                        <Timer className="w-2.5 h-2.5" /> {v.eta}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="text-right">
-                            <h2 className='text-2xl font-black text-slate-900 tracking-tighter'>₹{v.price}</h2>
-                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-0.5">Final Fare</p>
+                            <h2 className='text-xl font-black text-slate-900 tracking-tighter'>₹{v.price}</h2>
+                            <p className="text-[8px] text-slate-400 font-black uppercase tracking-[0.2em]">Fare</p>
                         </div>
                     </motion.div>
                 ))}
             </div>
 
-            <div className="mt-auto px-6 py-5 bg-indigo-50/50 rounded-3xl border border-indigo-100/50 flex items-center gap-4">
-                <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100 flex-shrink-0">
-                    <ShieldCheck className="w-6 h-6" />
+            <div className="mt-auto px-4 py-3 bg-indigo-50/50 rounded-2xl border border-indigo-100/50 flex items-center gap-3">
+                <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100 flex-shrink-0">
+                    <ShieldCheck className="w-5 h-5" />
                 </div>
-                <p className="text-xs font-bold text-indigo-900 leading-relaxed">
-                    All rides are insured via <span className="text-indigo-600 font-black">YatraSafe™</span>. Your safety is our obsession.
+                <p className="text-[9px] font-bold text-indigo-900 leading-relaxed">
+                    Insured via <span className="text-indigo-600 font-black">YatraSafe™</span>
                 </p>
             </div>
         </div>

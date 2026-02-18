@@ -18,6 +18,13 @@ export async function GET(req: NextRequest) {
         }
 
         const ride = await startRide({ rideId, otp, captainId: captain._id });
+
+        // Emit ride-started event via Socket.IO
+        const io = (global as any).io;
+        if (io) {
+            io.to(ride.user._id.toString()).emit('ride-started', ride);
+        }
+
         return NextResponse.json(ride, { status: 200 });
     } catch (error: any) {
         console.error('Start Ride Error:', error);

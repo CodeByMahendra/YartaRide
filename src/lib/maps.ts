@@ -165,7 +165,15 @@ export const getDistanceTime = async (origin: string, destination: string) => {
                 text: `${Math.round(durationInSeconds / 60)} mins`,
                 value: durationInSeconds
             },
-            fare: calculateFare(distanceInMeters)
+            fare: calculateFare(distanceInMeters),
+            // Fallback straight line route
+            route: {
+                type: 'LineString',
+                coordinates: [
+                    [originCoords.lng, originCoords.ltd],
+                    [destCoords.lng, destCoords.ltd]
+                ]
+            }
         };
     } catch (error: any) {
         console.error('Distance Calculation Error:', error.message);

@@ -77,7 +77,7 @@ const captainSchema = new Schema({
     },
     gender: {
         type: String,
-        enum: ['male', 'female'],
+        enum: ['male', 'female', 'others'],
         required: true,
     },
     isBlocked: {
@@ -92,7 +92,7 @@ const captainSchema = new Schema({
     referredBy: {
         type: String
     }
-});
+}, { timestamps: true });
 
 captainSchema.methods.generateAuthToken = function () {
     const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET!, { expiresIn: '24h' });

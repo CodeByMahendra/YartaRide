@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
         const user = await getUserFromToken(req);
         if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-        const { pickup, destination, vehicleType, isFemaleOnly, waitAtDestination } = await req.json();
+        const { pickup, destination, pickupLocation, destinationLocation, vehicleType, isFemaleOnly, waitAtDestination } = await req.json();
 
         if (!pickup || !destination || !vehicleType) {
             return NextResponse.json({ message: 'Invalid input data' }, { status: 400 });
@@ -19,10 +19,18 @@ export async function POST(req: NextRequest) {
             user: user._id,
             pickup,
             destination,
+            pickupLocation,
+            destinationLocation,
             vehicleType,
             isFemaleOnly,
             waitAtDestination
         });
+
+        // Emit new-ride event via Socket.IO
+        const io = (global as any).io;
+        if (io) {
+            io.emit('new-ride', ride);
+        }
 
         return NextResponse.json(ride, { status: 201 });
     } catch (error: any) {

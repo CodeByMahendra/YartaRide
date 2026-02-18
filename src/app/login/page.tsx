@@ -42,10 +42,10 @@ const UserLogin = () => {
         <div className="flex min-h-screen w-full bg-white font-sans overflow-x-hidden">
 
             {/* Left Narrative Section */}
-            <div className="hidden lg:flex lg:w-[55%] relative bg-[#0a0a0b] items-center justify-center p-16 overflow-hidden">
+            <div className="hidden lg:flex lg:w-[55%] relative bg-slate-900 items-center justify-center p-16 overflow-hidden">
                 {/* Mesh Gradient / Ambient Lights */}
                 <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-600/20 rounded-full blur-[160px] animate-pulse"></div>
-                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-yellow-500/10 rounded-full blur-[140px]"></div>
+                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[140px]"></div>
 
                 <div className="relative z-10 w-full max-w-2xl">
                     <motion.div
@@ -54,15 +54,20 @@ const UserLogin = () => {
                         transition={{ duration: 0.8 }}
                     >
                         <div className="flex items-center gap-4 mb-12">
-                            <div className="bg-white/5 backdrop-blur-2xl border border-white/10 p-4 rounded-3xl shadow-2xl">
-                                <img src="/images/logo.png" alt="YatraRide" className="w-32 brightness-0 invert" />
-                            </div>
+                            <h1 className="text-4xl font-black tracking-tight">
+                                <span className="bg-gradient-to-r from-indigo-400 to-indigo-300 bg-clip-text text-transparent">
+                                    Yatra
+                                </span>
+                                <span className="text-white">
+                                    Ride
+                                </span>
+                            </h1>
                             <div className="px-3 py-1 rounded-full border border-white/20 text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Authentic</div>
                         </div>
 
                         <h2 className="text-7xl font-black text-white leading-[1.1] tracking-tighter mb-10">
                             The Future of<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-white to-yellow-400">Personal Mobility.</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-200">Personal Mobility.</span>
                         </h2>
                     </motion.div>
 
@@ -105,14 +110,14 @@ const UserLogin = () => {
             </div>
 
             {/* Right Form Section */}
-            <div className="w-full lg:w-[45%] flex items-center justify-center p-8 md:p-12 relative bg-slate-50/50 overflow-y-auto no-scrollbar">
+            <div className="w-full lg:w-[45%] flex items-center justify-center p-4 md:p-12 relative bg-slate-50/50 overflow-y-auto no-scrollbar">
 
                 <motion.div
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="w-full max-w-lg"
                 >
-                    <div className="bg-white rounded-[3.5rem] p-10 md:p-16 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.06)] border border-slate-100 relative overflow-hidden">
+                    <div className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-16 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.06)] border border-slate-100 relative overflow-hidden">
 
                         {/* Decorative background element for form */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-full -mr-16 -mt-16 blur-2xl"></div>
@@ -200,9 +205,6 @@ const UserLogin = () => {
                             </button>
                         </form>
 
-                        <form onSubmit={submitHandler} className="space-y-8">
-                            {/* ... (Existing form fields) */}
-                        </form>
 
                         <div className="mt-10 flex items-center gap-4 text-slate-200">
                             <div className="h-px bg-slate-100 flex-1"></div>
@@ -239,7 +241,7 @@ const UserLogin = () => {
                             >
                                 <motion.div
                                     initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-                                    className="bg-white rounded-[4rem] p-12 max-w-md w-full shadow-2xl relative"
+                                    className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-12 max-w-md w-full shadow-2xl relative"
                                 >
                                     <button onClick={() => setShowMobileLogin(false)} className="absolute top-8 right-8 text-slate-300 hover:text-slate-900"><X className="w-6 h-6" /></button>
 

@@ -40,9 +40,9 @@ const CaptainLogin = () => {
         <div className="flex min-h-screen w-full bg-white font-sans overflow-hidden">
 
             {/* Left Section - Professional Narrative */}
-            <div className="hidden lg:flex lg:w-[55%] relative bg-[#050505] items-center justify-center p-16 overflow-hidden">
-                {/* Emerald/Neon Lights for Captain Theme */}
-                <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-emerald-600/10 rounded-full blur-[160px]"></div>
+            <div className="hidden lg:flex lg:w-[55%] relative bg-slate-900 items-center justify-center p-16 overflow-hidden">
+                {/* Indigo Lights for Captain Theme */}
+                <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-600/10 rounded-full blur-[160px]"></div>
                 <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[140px]"></div>
 
                 <div className="relative z-10 w-full max-w-2xl">
@@ -52,15 +52,20 @@ const CaptainLogin = () => {
                         transition={{ duration: 0.8 }}
                     >
                         <div className="flex items-center gap-4 mb-12">
-                            <div className="bg-white/5 backdrop-blur-2xl border border-white/10 p-4 rounded-3xl shadow-2xl">
-                                <img src="/images/logo.png" alt="YatraRide" className="w-32 brightness-0 invert" />
-                            </div>
-                            <div className="px-3 py-1 rounded-full border border-emerald-500/30 text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] bg-emerald-500/5">Captain Elite</div>
+                            <h1 className="text-4xl font-black tracking-tight">
+                                <span className="bg-gradient-to-r from-indigo-400 to-indigo-300 bg-clip-text text-transparent">
+                                    Yatra
+                                </span>
+                                <span className="text-white">
+                                    Ride
+                                </span>
+                            </h1>
+                            <div className="px-3 py-1 rounded-full border border-indigo-500/30 text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] bg-indigo-500/5">Captain Elite</div>
                         </div>
 
                         <h2 className="text-7xl font-black text-white leading-[1.1] tracking-tighter mb-10">
                             Command Your<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-teal-400">Earnings & Freedom.</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-200">Earnings & Freedom.</span>
                         </h2>
                     </motion.div>
 
@@ -76,7 +81,7 @@ const CaptainLogin = () => {
                                 transition={{ delay: 0.5 + idx * 0.1 }}
                                 className="group relative bg-white/5 border border-white/5 p-8 rounded-[2.5rem] backdrop-blur-3xl hover:bg-white/10 transition-all cursor-default"
                             >
-                                <item.icon className="w-10 h-10 text-emerald-400 mb-6" />
+                                <item.icon className="w-10 h-10 text-indigo-400 mb-6" />
                                 <h4 className="text-white font-black text-xl mb-2">{item.title}</h4>
                                 <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
                             </motion.div>
@@ -105,22 +110,22 @@ const CaptainLogin = () => {
             </div>
 
             {/* Right Form Section */}
-            <div className="w-full lg:w-[45%] flex items-center justify-center p-8 md:p-20 relative bg-emerald-50/10">
+            <div className="w-full lg:w-[45%] flex items-center justify-center p-4 md:p-20 relative bg-slate-50">
 
                 <motion.div
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="w-full max-w-lg"
                 >
-                    <div className="bg-white rounded-[3.5rem] p-10 md:p-16 shadow-[0_40px_100px_-20px_rgba(16,185,129,0.1)] border border-slate-100 relative overflow-hidden">
+                    <div className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-16 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.06)] border border-slate-100 relative overflow-hidden">
 
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 blur-2xl opacity-50"></div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 blur-2xl opacity-50"></div>
 
                         <div className="relative mb-12">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest mb-4">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-4">
                                 Captain Secure Entry
                             </div>
-                            <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-3">Captain Login.</h1>
+                            <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter mb-3">Captain Login.</h1>
                             <p className="text-slate-500 font-medium">Drive into your next professional milestone.</p>
                         </div>
 
@@ -144,13 +149,13 @@ const CaptainLogin = () => {
                             <div className="space-y-2">
                                 <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Fleet Email</label>
                                 <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300 group-focus-within:text-emerald-600 transition-colors">
+                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
                                         <Mail className="w-5 h-5" />
                                     </div>
                                     <input
                                         type="email" required value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="block w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-emerald-600 focus:bg-white rounded-3xl text-slate-900 font-bold transition-all outline-none placeholder:text-slate-300"
+                                        className="block w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white rounded-3xl text-slate-900 font-bold transition-all outline-none placeholder:text-slate-300"
                                         placeholder="captain@yatra.com"
                                     />
                                 </div>
@@ -159,13 +164,13 @@ const CaptainLogin = () => {
                             <div className="space-y-2">
                                 <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Captain Key</label>
                                 <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300 group-focus-within:text-emerald-600 transition-colors">
+                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
                                         <Lock className="w-5 h-5" />
                                     </div>
                                     <input
                                         type="password" required value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="block w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-emerald-600 focus:bg-white rounded-3xl text-slate-900 font-bold transition-all outline-none placeholder:text-slate-300"
+                                        className="block w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white rounded-3xl text-slate-900 font-bold transition-all outline-none placeholder:text-slate-300"
                                         placeholder="••••••••••••"
                                     />
                                 </div>
@@ -173,7 +178,7 @@ const CaptainLogin = () => {
 
                             <button
                                 type="submit" disabled={isLoading}
-                                className="w-full group relative bg-emerald-600 text-white rounded-[2rem] py-6 font-black flex items-center justify-center gap-3 hover:bg-emerald-700 active:scale-[0.98] transition-all shadow-2xl shadow-emerald-100 disabled:opacity-70 overflow-hidden"
+                                className="w-full group relative bg-indigo-600 text-white rounded-[2rem] py-6 font-black flex items-center justify-center gap-3 hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-2xl shadow-indigo-500/20 disabled:opacity-70 overflow-hidden"
                             >
                                 {isLoading ? (
                                     <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -189,7 +194,7 @@ const CaptainLogin = () => {
                         <div className="mt-12 text-center">
                             <p className="text-slate-500 font-bold text-sm">
                                 Not a partner yet?{' '}
-                                <Link href="/captain-signup" className="text-emerald-600 font-black hover:underline underline-offset-4">Register Vehicle</Link>
+                                <Link href="/captain-signup" className="text-indigo-600 font-black hover:underline underline-offset-4">Register Vehicle</Link>
                             </p>
                         </div>
                     </div>

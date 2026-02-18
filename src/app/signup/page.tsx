@@ -15,6 +15,7 @@ const UserSignup = () => {
     const [password, setPassword] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
+    const [gender, setGender] = useState('male');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -30,7 +31,8 @@ const UserSignup = () => {
             const newUser = {
                 fullname: { firstname: firstName, lastname: lastName },
                 email,
-                password
+                password,
+                gender
             };
 
             const response = await axios.post('/api/user/register', newUser);
@@ -48,13 +50,13 @@ const UserSignup = () => {
     };
 
     return (
-        <div className="flex min-h-screen w-full bg-[#0a0a0b] font-sans overflow-x-hidden">
+        <div className="flex min-h-screen w-full bg-slate-900 font-sans overflow-x-hidden">
 
             {/* Left Narrative Section - Luxury Identity */}
             <div className="hidden lg:flex lg:w-[40%] relative items-center justify-center p-20 overflow-hidden border-r border-white/5">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute top-[-10%] right-[-10%] w-[100%] h-[100%] bg-indigo-600/10 rounded-full blur-[150px]"></div>
-                    <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[80%] bg-yellow-500/5 rounded-full blur-[120px]"></div>
+                    <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[80%] bg-indigo-500/5 rounded-full blur-[120px]"></div>
                 </div>
 
                 <div className="relative z-10 w-full max-w-sm">
@@ -63,15 +65,20 @@ const UserSignup = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 p-6 inline-flex items-center gap-4 rounded-[2.5rem] mb-12 shadow-2xl">
-                            <img src="/images/logo.png" alt="YatraRide" className="w-32 opacity-90" />
-                            <div className="h-4 w-[1px] bg-white/20"></div>
-                            <span className="text-[10px] font-black tracking-[0.3em] text-white/30 uppercase">JOIN</span>
+                        <div className="mb-12">
+                            <h1 className="text-4xl font-black tracking-tight">
+                                <span className="bg-gradient-to-r from-indigo-400 to-indigo-300 bg-clip-text text-transparent">
+                                    Yatra
+                                </span>
+                                <span className="text-white">
+                                    Ride
+                                </span>
+                            </h1>
                         </div>
 
                         <h2 className="text-7xl font-black text-white leading-[1.05] tracking-tighter mb-10 italic">
                             START<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-white">SHAPING.</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-200">SHAPING.</span>
                         </h2>
 
                         <p className="text-white/40 text-lg font-medium leading-relaxed mb-16 px-1 border-l-2 border-indigo-600/30">
@@ -97,14 +104,14 @@ const UserSignup = () => {
             </div>
 
             {/* Right Registration Form */}
-            <div className="w-full lg:w-[60%] flex items-center justify-center p-8 md:p-16 bg-slate-50/10 overflow-y-auto no-scrollbar relative">
+            <div className="w-full lg:w-[60%] flex items-center justify-center p-4 md:p-16 bg-slate-50/10 overflow-y-auto no-scrollbar relative">
 
                 <motion.div
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="w-full max-w-2xl py-12"
                 >
-                    <div className="bg-white rounded-[4rem] p-10 md:p-20 shadow-[0_40px_100px_rgba(0,0,0,0.4)] border border-slate-200/60 relative overflow-hidden">
+                    <div className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-20 shadow-[0_40px_100px_rgba(0,0,0,0.4)] border border-slate-200/60 relative overflow-hidden">
 
                         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50"></div>
 
@@ -113,7 +120,7 @@ const UserSignup = () => {
                                 <Link href="/login" className="inline-flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-widest mb-6 group">
                                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Entrance
                                 </Link>
-                                <h1 className="text-5xl font-black text-slate-900 tracking-tighter mb-4">Membership.</h1>
+                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter mb-4">Membership.</h1>
                                 <p className="text-slate-500 font-medium">Verify your details to gain access to the platform.</p>
                             </div>
                             <div className="w-20 h-20 bg-indigo-50 rounded-[2rem] flex items-center justify-center text-indigo-600 shadow-inner">

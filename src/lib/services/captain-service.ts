@@ -5,8 +5,8 @@ import crypto from 'crypto';
 export const createCaptain = async ({
     firstname, lastname, email, password, color, plate, capacity, vehicleType, ltd, lng, gender, referredBy
 }: any) => {
-    if (!firstname || !email || !password || !color || !plate || !capacity || !vehicleType || !gender) {
-        throw new Error('All fields are required');
+    if (!firstname || !email || !password || !color || !plate || !vehicleType) {
+        throw new Error('Required fields missing for captain creation');
     }
     const referralCode = crypto.randomBytes(3).toString('hex').toUpperCase();
 

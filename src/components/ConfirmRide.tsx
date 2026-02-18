@@ -23,89 +23,84 @@ const ConfirmRide = ({ setConfirmRidePanel, setVehicleFound, createRide, pickup,
     const currentV = vehicleType ? (vehicleInfo as any)[vehicleType] : vehicleInfo.car;
 
     return (
-        <div className="flex flex-col h-full bg-white">
-            <div className="flex items-center gap-6 mb-10">
+        <div className="flex flex-col flex-1 min-h-0 p-4 md:p-5 pb-8 md:pb-8">
+            <div className="flex items-center gap-3 mb-4">
                 <button
                     onClick={() => setConfirmRidePanel(false)}
-                    className="p-3 bg-slate-100 rounded-2xl hover:bg-slate-200 transition-all active:scale-90"
+                    className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition-all active:scale-90"
                 >
-                    <ChevronLeft className="w-6 h-6 text-slate-800" />
+                    <ChevronLeft className="w-4 h-4 text-slate-800" />
                 </button>
                 <div>
-                    <h3 className='text-3xl font-black text-slate-900 tracking-tighter leading-none'>Booking.</h3>
-                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] mt-2">Ready to authorize</p>
+                    <h3 className='text-xl font-black text-slate-900 tracking-tighter leading-none'>Booking.</h3>
+                    <p className="text-slate-400 font-bold text-[8px] uppercase tracking-[0.2em] mt-0.5">Ready to authorize</p>
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto no-scrollbar space-y-10">
+            <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 pr-1">
                 {/* Visual Showcase Card */}
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className={`relative flex flex-col items-center justify-center p-10 bg-gradient-to-br ${currentV.color} rounded-[3.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden`}
+                    className={`relative flex flex-col items-center justify-center p-2.5 bg-gradient-to-br ${currentV.color} rounded-[1.25rem] shadow-md overflow-hidden`}
                 >
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full -ml-24 -mb-24 blur-3xl"></div>
-
-                    <img className='h-40 object-contain relative z-10 filter drop-shadow-[0_20px_20px_rgba(0,0,0,0.4)]' src={currentV.img} alt={currentV.name} />
-
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
-                        <Zap className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest">{currentV.name} Verified</span>
+                    <img className='h-16 md:h-20 object-contain relative z-10 filter drop-shadow-[0_8px_8px_rgba(0,0,0,0.4)]' src={currentV.img} alt={currentV.name} />
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/20">
+                        <Zap className="w-2 h-2 text-yellow-400 fill-yellow-400" />
+                        <span className="text-[7px] font-black text-white uppercase tracking-widest leading-none">Verified</span>
                     </div>
                 </motion.div>
 
                 {/* Navigation Track */}
-                <div className='relative bg-slate-50 rounded-[3rem] p-8 space-y-8 border border-slate-100'>
-                    <div className="absolute left-[38px] top-[48px] bottom-[48px] w-[2px] bg-slate-200 flex flex-col justify-between items-center py-4">
-                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-                        <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]"></div>
+                <div className='relative bg-slate-50 rounded-[1.5rem] p-4 space-y-4 border border-slate-100'>
+                    <div className="absolute left-[22px] top-[32px] bottom-[32px] w-[2px] bg-slate-200 flex flex-col justify-between items-center py-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
                     </div>
 
-                    <div className='flex gap-6 items-start'>
-                        <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 text-slate-400">
-                            <Navigation className="w-6 h-6" />
+                    <div className='flex gap-3 items-start'>
+                        <div className="w-9 h-9 rounded-lg bg-white shadow-sm flex items-center justify-center flex-shrink-0 text-slate-400">
+                            <Navigation className="w-4 h-4" />
                         </div>
                         <div className="flex-1 overflow-hidden">
-                            <h5 className='text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1'>Departure</h5>
-                            <p className='text-sm font-black text-slate-900 leading-tight line-clamp-2'>{pickup}</p>
+                            <h5 className='text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 mb-0.5'>Departure</h5>
+                            <p className='text-[12px] font-black text-slate-900 leading-tight line-clamp-2'>{pickup}</p>
                         </div>
                     </div>
 
-                    <div className='flex gap-6 items-start'>
-                        <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 text-slate-400">
-                            <MapPin className="w-6 h-6" />
+                    <div className='flex gap-3 items-start'>
+                        <div className="w-9 h-9 rounded-lg bg-white shadow-sm flex items-center justify-center flex-shrink-0 text-slate-400">
+                            <MapPin className="w-4 h-4" />
                         </div>
                         <div className="flex-1 overflow-hidden">
-                            <h5 className='text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1'>Arrival</h5>
-                            <p className='text-sm font-black text-slate-900 leading-tight line-clamp-2'>{destination}</p>
+                            <h5 className='text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 mb-0.5'>Arrival</h5>
+                            <p className='text-[12px] font-black text-slate-900 leading-tight line-clamp-2'>{destination}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Final Fare Summary */}
-                <div className='flex items-center justify-between p-8 bg-black rounded-[2.5rem] text-white overflow-hidden relative'>
+                <div className='flex items-center justify-between p-3.5 bg-black rounded-[1.25rem] text-white overflow-hidden relative'>
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/40 to-transparent opacity-50"></div>
                     <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-1">
-                            <CreditCard className="w-4 h-4 text-indigo-400" />
-                            <h5 className='text-[10px] font-black uppercase tracking-[0.2em] text-white/50'>Authorize Payment</h5>
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                            <CreditCard className="w-3 h-3 text-indigo-400" />
+                            <h5 className='text-[8px] font-black uppercase tracking-[0.2em] text-white/50'>Authorize</h5>
                         </div>
-                        <h3 className='text-4xl font-black tracking-tighter'>₹{fare?.fares && vehicleType ? fare.fares[vehicleType] : 0}</h3>
+                        <h3 className='text-2xl font-black tracking-tighter'>₹{fare?.fares && vehicleType ? fare.fares[vehicleType] : 0}</h3>
                     </div>
                     <div className="relative z-10 text-right">
-                        <div className="bg-white/10 backdrop-blur-xl px-4 py-2 rounded-2xl border border-white/10 group cursor-default shadow-2xl">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300 block mb-0.5">Method</span>
-                            <span className="text-sm font-black text-white">Cash in Hand</span>
+                        <div className="bg-white/10 backdrop-blur-xl px-2.5 py-1.5 rounded-lg border border-white/10 group cursor-default">
+                            <span className="text-[8px] font-black text-white block">Cash Only</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="pt-10 flex gap-4">
+            <div className="pt-4 flex gap-2.5">
                 <button
                     onClick={() => setConfirmRidePanel(false)}
-                    className='flex-1 flex items-center justify-center gap-2 py-6 bg-slate-100 text-slate-500 rounded-[2rem] font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all border border-slate-200'
+                    className='flex-1 flex items-center justify-center gap-2 py-4 bg-slate-100 text-slate-500 rounded-[1.25rem] font-black uppercase tracking-widest text-[9px] hover:bg-slate-200 transition-all border border-slate-200'
                 >
                     Cancel
                 </button>
@@ -115,11 +110,11 @@ const ConfirmRide = ({ setConfirmRidePanel, setVehicleFound, createRide, pickup,
                         setConfirmRidePanel(false);
                         createRide();
                     }}
-                    className='flex-[2] group relative bg-indigo-600 text-white rounded-[2rem] py-6 font-black flex items-center justify-center gap-3 hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-[0_20px_50px_rgba(79,70,229,0.3)] overflow-hidden'
+                    className='flex-[2] group relative bg-indigo-600 text-white rounded-[1.25rem] py-4 font-black flex items-center justify-center gap-2 hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-xl overflow-hidden'
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-800 opacity-0 group-hover:opacity-100 transition-all"></div>
-                    <span className="relative z-10 uppercase tracking-widest">Confirm & Book</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
+                    <span className="relative z-10 uppercase tracking-widest text-[9px]">Confirm & Book</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform relative z-10" />
                 </button>
             </div>
         </div>

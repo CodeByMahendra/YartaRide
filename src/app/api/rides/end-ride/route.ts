@@ -16,6 +16,13 @@ export async function POST(req: NextRequest) {
         }
 
         const ride = await endRide({ rideId, captainId: captain._id });
+
+        // Emit ride-ended event via Socket.IO
+        const io = (global as any).io;
+        if (io) {
+            io.to(ride.user._id.toString()).emit('ride-ended', ride);
+        }
+
         return NextResponse.json(ride, { status: 200 });
     } catch (error: any) {
         console.error('End Ride Error:', error);
