@@ -81,8 +81,14 @@ export async function createRide({
         user,
         pickup, // Human readable address string
         destination, // Human readable address string
-        pickupLocation, // Coordinates for map/routing
-        destinationLocation, // Coordinates for map/routing
+        pickupLocation: {
+            type: 'Point',
+            coordinates: [pickupLocation.lng, pickupLocation.lat || pickupLocation.ltd]
+        },
+        destinationLocation: {
+            type: 'Point',
+            coordinates: [destinationLocation.lng, destinationLocation.lat || destinationLocation.ltd]
+        },
         otp: generateOtp(4),
         fare: (fareData.fares as any)[vehicleType],
         passUsed: !!activePass,
@@ -90,7 +96,10 @@ export async function createRide({
         waitAtDestination: waitAtDestination || false
     });
 
-    return ride;
+    // Populate user before returning
+    const populatedRide = await Ride.findById(ride._id).populate('user');
+
+    return populatedRide;
 }
 
 export async function confirmRide({ rideId, captainId }: { rideId: string, captainId: string }) {

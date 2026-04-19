@@ -4,11 +4,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Ticket, Zap, ShieldCheck, Clock, Crown,
     ArrowRight, Check, Sparkles, MapPin,
-    Calendar, ArrowLeft, Star
+    Calendar, ArrowLeft, Star, X
 } from 'lucide-react';
 import Link from 'next/link';
+import axios from 'axios';
 
 const Passes = () => {
+    const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+    const [pickup, setPickup] = useState('');
+    const [destination, setDestination] = useState('');
+    const [type, setType] = useState('student');
+    const [loading, setLoading] = useState(false);
+    const [successMsg, setSuccessMsg] = useState('');
+    const [errorMsg, setErrorMsg] = useState('');
+
     const plans = [
         {
             id: 'basic',
@@ -49,8 +58,46 @@ const Passes = () => {
         }
     ];
 
+    const handleActivate = async () => {
+        if (!pickup || !destination) {
+            setErrorMsg('Please enter pickup and destination');
+            return;
+        }
+
+        setLoading(true);
+        setErrorMsg('');
+        
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post('/api/passes', {
+                pickup,
+                destination,
+                type,
+                planId: selectedPlan
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (res.status === 201) {
+                setSuccessMsg('Pass activated successfully!');
+                setTimeout(() => {
+                    setSelectedPlan(null);
+                    setSuccessMsg('');
+                    setPickup('');
+                    setDestination('');
+                }, 3000);
+            }
+        } catch (err: any) {
+            setErrorMsg(err.response?.data?.message || 'Failed to activate pass');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-slate-950 font-sans pb-20">
+        <div className="min-h-screen bg-slate-950 font-sans pb-20 relative">
             {/* Immersive Header */}
             <div className="relative h-[300px] md:h-[400px] bg-slate-900 flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 to-slate-950 opacity-80"></div>
@@ -125,7 +172,7 @@ const Passes = () => {
                                 </div>
                             </div>
 
-                            <button className={`w-full py-6 ${plan.featured ? 'bg-gradient-to-r from-indigo-600 to-indigo-700' : 'bg-slate-800'} text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs hover:scale-[1.02] transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 border border-white/5`}>
+                            <button onClick={() => setSelectedPlan(plan.id)} className={`w-full py-6 ${plan.featured ? 'bg-gradient-to-r from-indigo-600 to-indigo-700' : 'bg-slate-800'} text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs hover:scale-[1.02] transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 border border-white/5`}>
                                 Activate Pass <ArrowRight className="w-4 h-4" />
                             </button>
                         </motion.div>
@@ -150,6 +197,85 @@ const Passes = () => {
                     </div>
                 </div>
             </div>
+
+            <AnimatePresence>
+                {selectedPlan && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    >
+                        <motion.div 
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="bg-slate-900 border border-slate-800 p-8 rounded-[3rem] w-full max-w-md shadow-2xl"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-2xl font-black text-white tracking-tighter inline-flex items-center gap-2">
+                                    <MapPin className="w-6 h-6 text-indigo-500" />
+                                    Route Details
+                                </h3>
+                                <button onClick={() => setSelectedPlan(null)} className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {successMsg ? (
+                                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl text-center font-bold">
+                                    {successMsg}
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {errorMsg && <p className="text-red-400 text-sm font-bold text-center">{errorMsg}</p>}
+                                    
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Pickup Location</label>
+                                        <input 
+                                            type="text" 
+                                            value={pickup}
+                                            onChange={(e) => setPickup(e.target.value)}
+                                            placeholder="Enter precise pickup address"
+                                            className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Drop Location</label>
+                                        <input 
+                                            type="text" 
+                                            value={destination}
+                                            onChange={(e) => setDestination(e.target.value)}
+                                            placeholder="Enter precise destination"
+                                            className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                                        />
+                                        <p className="text-[10px] text-slate-500 mt-2 ml-2 leading-tight">Prices are locked for this exact route. Make sure spelling matches your usual ride searches.</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Pass Type</label>
+                                        <select 
+                                            value={type}
+                                            onChange={(e) => setType(e.target.value)}
+                                            className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                                        >
+                                            <option value="student">Student Pass</option>
+                                            <option value="office">Office Commute</option>
+                                        </select>
+                                    </div>
+
+                                    <button 
+                                        onClick={handleActivate}
+                                        disabled={loading}
+                                        className="w-full py-5 mt-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
+                                    >
+                                        {loading ? 'Processing...' : 'Confirm Activation'}
+                                    </button>
+                                </div>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <div className="absolute inset-0 z-[-1] opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
         </div>

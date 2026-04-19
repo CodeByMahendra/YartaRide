@@ -22,9 +22,32 @@ const rideSchema = new Schema({
         type: Number,
         required: true,
     },
+    rideType: {
+        type: String,
+        enum: ['private', 'shared'],
+        default: 'private',
+    },
+    seatsRequired: {
+        type: Number,
+        default: 1,
+    },
+    matchedUsers: [{
+        type: Schema.Types.ObjectId,
+        ref: 'user',
+    }],
+    routePolyline: {
+        type: String,
+    },
+    fareBreakdown: {
+        baseFare: Number,
+        distanceFare: Number,
+        perKmRate: Number,
+        discount: Number,
+        platformCommission: Number,
+    },
     status: {
         type: String,
-        enum: ['pending', 'accepted', 'ongoing', 'completed', 'cancelled'],
+        enum: ['searching', 'matched', 'accepted', 'ongoing', 'completed', 'cancelled', 'pending'],
         default: 'pending',
     },
     duration: {
@@ -64,24 +87,33 @@ const rideSchema = new Schema({
         default: false,
     },
     pickupLocation: {
-        ltd: {
-            type: Number,
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
         },
-        lng: {
-            type: Number,
+        coordinates: {
+            type: [Number], // [lng, lat]
+            required: true
         }
     },
     destinationLocation: {
-        ltd: {
-            type: Number,
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
         },
-        lng: {
-            type: Number,
+        coordinates: {
+            type: [Number], // [lng, lat]
+            required: true
         }
     }
 }, {
     timestamps: true
 });
+
+rideSchema.index({ pickupLocation: '2dsphere' });
+rideSchema.index({ destinationLocation: '2dsphere' });
 
 const Ride = models.ride || model('ride', rideSchema);
 

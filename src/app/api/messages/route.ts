@@ -4,6 +4,7 @@ import Message from '@/models/Message';
 import { verifyJwtToken } from '@/lib/auth';
 import User from '@/models/User';
 import Captain from '@/models/Captain';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 
 export async function GET(request: Request) {
     try {
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
                 partnerId,
                 partnerName,
                 partnerType,
-                lastMessage: msg.content,
+                lastMessage: msg.contentType && msg.contentType !== 'text' ? `[${msg.contentType.toUpperCase()}]` : msg.content,
                 lastMessageTime: msg.createdAt,
                 messages: conversationsMap[partnerId] ? [...conversationsMap[partnerId].messages, msg] : [msg]
             };
@@ -66,10 +67,18 @@ export async function POST(request: Request) {
         if (!decoded) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
         const body = await request.json();
-        const { receiverId, receiverModel, content, rideId } = body;
+        let { receiverId, receiverModel, content, rideId, contentType, mediaUrl, locationData } = body;
 
-        if (!receiverId || !content) {
+        if (!receiverId || (!content && !mediaUrl && !locationData)) {
             return NextResponse.json({ message: 'Receiver and content required' }, { status: 400 });
+        }
+
+        // Upload to Cloudinary if media is present
+        let cloudinaryUrl = mediaUrl;
+        if (mediaUrl && (contentType === 'image' || contentType === 'voice')) {
+            const folder = contentType === 'image' ? 'yatraride/messages/images' : 'yatraride/messages/voice';
+            const uploadResult = await uploadToCloudinary(mediaUrl, folder);
+            cloudinaryUrl = uploadResult.url;
         }
 
         // Determine sender model (this is a bit tricky, but we can check the decoded info or assume based on which login used)
@@ -83,17 +92,23 @@ export async function POST(request: Request) {
             senderModel,
             receiver: receiverId,
             receiverModel,
-            content,
-            ride: rideId
+            content: content || (contentType === 'location' ? 'Location Shared' : contentType),
+            ride: rideId,
+            contentType: contentType || 'text',
+            mediaUrl: cloudinaryUrl,
+            locationData
         });
 
-        // Emit socket event if needed (socket is global in server.js but not easily accessible here in Next.js edge/api)
-        // We'll rely on global.io if available
+        // Populate sender to get name for notifications
+        const populatedMessage = await Message.findById(newMessage._id)
+            .populate('sender', 'fullname profileImage');
+
+        // Emit socket event if needed
         if ((global as any).io) {
-            (global as any).io.to(receiverId).emit('new-message', newMessage);
+            (global as any).io.to(receiverId).emit('new-message', populatedMessage);
         }
 
-        return NextResponse.json({ message: newMessage });
+        return NextResponse.json({ message: populatedMessage });
 
     } catch (error: any) {
         return NextResponse.json({ message: error.message }, { status: 500 });

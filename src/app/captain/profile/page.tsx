@@ -12,20 +12,41 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 export default function CaptainProfilePage() {
-    const { captain } = useContext(CaptainDataContext);
+    const { captain, setCaptain } = useContext(CaptainDataContext);
     const [stats, setStats] = useState<any>(null);
     const router = useRouter();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            axios.get('/api/captain/stats', {
-                headers: { Authorization: `Bearer ${token}` }
-            }).then(res => {
-                if (res.data.stats) setStats(res.data.stats);
-            }).catch(err => console.error("Stats fetch failed:", err));
-        }
-    }, []);
+        const fetchProfileAndStats = async () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    // Fetch captain profile if context is empty
+                    if (!captain || !captain._id) {
+                        const profileRes = await axios.get('/api/captain/profile', {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        if (setCaptain) setCaptain(profileRes.data.captain);
+                    }
+
+                    // Fetch stats
+                    const statsRes = await axios.get('/api/captain/stats', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (statsRes.data.stats) setStats(statsRes.data.stats);
+                } catch (err: any) {
+                    console.error("Session restore failed:", err);
+                    if (err.response?.status === 401) {
+                        localStorage.removeItem('token');
+                        router.push('/captain-login');
+                    }
+                }
+            } else {
+                router.push('/captain-login');
+            }
+        };
+        fetchProfileAndStats();
+    }, [captain, setCaptain, router]);
 
     if (!captain) {
         return (

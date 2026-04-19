@@ -34,6 +34,26 @@ export const getCaptainFromToken = async (req: NextRequest) => {
     }
 };
 
+export const getAuthEntity = async (req: NextRequest) => {
+    try {
+        const token = req.cookies.get('token')?.value || req.headers.get('authorization')?.split(' ')[1];
+        if (!token) return null;
+
+        const decoded: any = jwt.verify(token, JWT_SECRET);
+        await connectToDb();
+        
+        let entity = await User.findById(decoded._id);
+        if (entity) return { entity, role: 'user' };
+        
+        entity = await Captain.findById(decoded._id);
+        if (entity) return { entity, role: 'captain' };
+        
+        return null;
+    } catch (error) {
+        return null;
+    }
+};
+
 export const verifyJwtToken = (token: string) => {
     try {
         return jwt.verify(token, JWT_SECRET) as any;

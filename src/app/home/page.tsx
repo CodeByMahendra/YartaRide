@@ -8,25 +8,22 @@ import VehiclePanel from '@/components/VehiclePanel';
 import ConfirmRide from '@/components/ConfirmRide';
 import LookingForDriver from '@/components/LookingForDriver';
 import WaitingForDriver from '@/components/WaitingForDriver';
+import BottomNav from '@/components/BottomNav';
 import { SocketDataContext } from '@/context/SocketContext';
 import { UserDataContext } from '@/context/UserDataContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LiveTracking from '@/components/LiveTracking';
-import { User, LogOut, Navigation, Search, Menu, X, ChevronDown, Bell, Shield, Settings, Wallet, MapPin, MessageSquare } from 'lucide-react';
-import { motion } from 'framer-motion';
+import NotificationBell from '@/components/NotificationBell';
+import { User, LogOut, Navigation, Search, Menu, X, ChevronDown, Bell, Shield, Settings, Wallet, MapPin, MessageSquare, Star, ArrowUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/context/ToastContext';
 
 const Home = () => {
     const [pickup, setPickup] = useState('');
     const [destination, setDestination] = useState('');
     const [panelOpen, setPanelOpen] = useState(false);
-    const vehiclePanelRef = useRef(null);
-    const confirmRidePanelRef = useRef(null);
-    const vehicleFoundRef = useRef(null);
-    const waitingForDriverRef = useRef(null);
-    const panelRef = useRef(null);
-
+    
     const [vehiclePanel, setVehiclePanel] = useState(false);
     const [confirmRidePanel, setConfirmRidePanel] = useState(false);
     const [vehicleFound, setVehicleFound] = useState(false);
@@ -38,6 +35,8 @@ const Home = () => {
 
     const [fare, setFare] = useState<any>({});
     const [vehicleType, setVehicleType] = useState<string | null>(null);
+    const [rideType, setRideType] = useState<'private' | 'shared'>('private');
+    const [seatsRequired, setSeatsRequired] = useState(1);
     const [ride, setRide] = useState<any>(null);
     const [pickupLocation, setPickupLocation] = useState<[number, number] | null>(null);
     const [destinationLocation, setDestinationLocation] = useState<[number, number] | null>(null);
@@ -60,14 +59,12 @@ const Home = () => {
 
         if (!user || !user._id) {
             axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user/profile`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                headers: { Authorization: `Bearer ${token}` }
             })
                 .then(response => {
                     setUser(response.data.user);
                 })
-                .catch(err => {
+                .catch((err: any) => {
                     console.error('Error fetching user profile:', err);
                     if (err.response?.status === 401) {
                         localStorage.removeItem('token');
@@ -90,9 +87,7 @@ const Home = () => {
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     const { latitude, longitude } = position.coords;
-                    console.log('User location detected:', latitude, longitude);
                     setPickupLocation([latitude, longitude]);
-
                     try {
                         const response = await axios.get(`/api/maps/get-address-from-coordinates`, {
                             params: { ltd: latitude, lng: longitude },
@@ -100,68 +95,44 @@ const Home = () => {
                         });
                         if (response.data?.address) {
                             setPickup(response.data.address);
-                            console.log('Address set:', response.data.address);
                         }
                     } catch (error) {
-                        console.error('Error reverse geocoding:', error);
                         setPickup('Current Location');
                     }
                 },
                 (error) => {
-                    console.error('Geolocation error:', error);
                     showToast('Unable to get your location. Please enable location services.', 'error');
-                    setPickupLocation([22.7196, 75.8577]);
-                    setPickup('Indore, Madhya Pradesh');
                 },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         }
     };
 
-    // Initial Setup & Geolocation
     useEffect(() => {
         if (socket && user?._id) {
             socket.emit("join", { userType: "user", userId: user._id });
         }
-
-        // Get user's current location immediately on page load
-        if (!pickup) {
-            handleGetCurrentLocation();
-        }
+        if (!pickup) handleGetCurrentLocation();
     }, [user, socket]);
 
-    // Fetch Nearby Captains
     useEffect(() => {
         const fetchCaptains = async () => {
             if (!pickupLocation) return;
             try {
                 const response = await axios.get('/api/captain/near', {
-                    params: {
-                        ltd: pickupLocation[0],
-                        lng: pickupLocation[1],
-                        radius: 50 // Increased to 50km for better test visibility
-                    },
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
+                    params: { ltd: pickupLocation[0], lng: pickupLocation[1], radius: 50 },
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
-                console.log(`Fetched ${response.data.length} nearby captains`);
                 setCaptains(response.data);
             } catch (error) {
                 console.error('Error fetching nearby captains:', error);
             }
         };
-
         fetchCaptains();
-        const interval = setInterval(fetchCaptains, 10000); // Update every 10 seconds
+        const interval = setInterval(fetchCaptains, 10000);
         return () => clearInterval(interval);
     }, [pickupLocation]);
 
-    // Socket Listeners
     useEffect(() => {
         if (!socket) return;
         socket.on('ride-confirmed', (ride: any) => {
@@ -175,7 +146,6 @@ const Home = () => {
             setWaitingForDriver(false);
             router.push(`/riding?rideId=${ride._id}`);
         });
-
         socket.on('update-location-captain', (data: any) => {
             const { userId, location } = data;
             setCaptains(prev => {
@@ -184,17 +154,13 @@ const Home = () => {
                     const newCaptains = [...prev];
                     newCaptains[index] = {
                         ...newCaptains[index],
-                        location: {
-                            ...newCaptains[index].location,
-                            coordinates: [location.lng, location.ltd]
-                        }
+                        location: { ...newCaptains[index].location, coordinates: [location.lng, location.ltd] }
                     };
                     return newCaptains;
                 }
                 return prev;
             });
         });
-
         return () => {
             socket.off('ride-confirmed');
             socket.off('ride-started');
@@ -202,7 +168,6 @@ const Home = () => {
         };
     }, [socket]);
 
-    // Live Suggestions
     useEffect(() => {
         const fetchSuggestions = async () => {
             if (!pickup || pickup.length < 3 || activeField !== 'pickup') {
@@ -210,21 +175,13 @@ const Home = () => {
                 return;
             }
             try {
-                const params: any = { input: pickup };
-                if (pickupLocation) {
-                    params.ltd = pickupLocation[0];
-                    params.lng = pickupLocation[1];
-                }
                 const response = await axios.get(`/api/maps/get-suggestions`, {
-                    params,
+                    params: { input: pickup, ltd: pickupLocation?.[0], lng: pickupLocation?.[1] },
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
                 setPickupSuggestions(response.data);
-            } catch (error) {
-                console.error('Error fetching pickup suggestions:', error);
-            }
+            } catch (error) {}
         };
-
         const timeoutId = setTimeout(fetchSuggestions, 300);
         return () => clearTimeout(timeoutId);
     }, [pickup, activeField, pickupLocation]);
@@ -236,59 +193,24 @@ const Home = () => {
                 return;
             }
             try {
-                const params: any = { input: destination };
-                if (pickupLocation) {
-                    params.ltd = pickupLocation[0];
-                    params.lng = pickupLocation[1];
-                }
                 const response = await axios.get(`/api/maps/get-suggestions`, {
-                    params,
+                    params: { input: destination, ltd: pickupLocation?.[0], lng: pickupLocation?.[1] },
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
                 setDestinationSuggestions(response.data);
-            } catch (error) {
-                console.error('Error fetching destination suggestions:', error);
-            }
+            } catch (error) {}
         };
-
         const timeoutId = setTimeout(fetchSuggestions, 300);
         return () => clearTimeout(timeoutId);
     }, [destination, activeField, pickupLocation]);
-
-    // GSAP Panel Control
-    useGSAP(() => {
-        if (panelOpen) {
-            gsap.to(panelRef.current, { height: 'auto', opacity: 1, duration: 0.6, ease: 'expo.out' });
-        } else {
-            gsap.to(panelRef.current, { height: 0, opacity: 0, duration: 0.4, ease: 'power2.in' });
-        }
-    }, [panelOpen]);
-
-    useGSAP(() => {
-        gsap.to(vehiclePanelRef.current, { transform: vehiclePanel ? 'translateY(0)' : 'translateY(110%)', duration: 0.7, ease: 'expo.out' });
-    }, [vehiclePanel]);
-
-    useGSAP(() => {
-        gsap.to(confirmRidePanelRef.current, { transform: confirmRidePanel ? 'translateY(0)' : 'translateY(110%)', duration: 0.7, ease: 'expo.out' });
-    }, [confirmRidePanel]);
-
-    useGSAP(() => {
-        gsap.to(vehicleFoundRef.current, { transform: vehicleFound ? 'translateY(0)' : 'translateY(110%)', duration: 0.7, ease: 'expo.out' });
-    }, [vehicleFound]);
-
-    useGSAP(() => {
-        gsap.to(waitingForDriverRef.current, { transform: waitingForDriver ? 'translateY(0)' : 'translateY(110%)', duration: 0.7, ease: 'expo.out' });
-    }, [waitingForDriver]);
 
     const findTrip = async () => {
         if (!pickup || !destination) return;
         setVehiclePanel(true);
         setPanelOpen(false);
         try {
-            // Use coordinates if available for better accuracy and to avoid geocoding failures
             const pickupParam = pickupLocation ? `${pickupLocation[0]},${pickupLocation[1]}` : pickup;
             const destParam = destinationLocation ? `${destinationLocation[0]},${destinationLocation[1]}` : destination;
-
             const response = await axios.get(`/api/rides/get-fare`, {
                 params: { pickup: pickupParam, destination: destParam },
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -299,200 +221,285 @@ const Home = () => {
                 setRoute(formattedRoute);
             }
         } catch (error) {
-            console.error('Error finding trip:', error);
             setVehiclePanel(false);
         }
     };
 
     const createRide = async () => {
         try {
-            const response = await axios.post(`/api/rides/create`, {
-                pickup, // Address string
-                destination, // Address string
-                pickupLocation: pickupLocation ? { ltd: pickupLocation[0], lng: pickupLocation[1] } : null,
-                destinationLocation: destinationLocation ? { ltd: destinationLocation[0], lng: destinationLocation[1] } : null,
-                vehicleType
+            const endpoint = rideType === 'shared' ? '/api/ride/request' : '/api/rides/create';
+            const response = await axios.post(endpoint, {
+                pickup,
+                destination,
+                pickupLocation: pickupLocation ? { lat: pickupLocation[0], lng: pickupLocation[1], ltd: pickupLocation[0] } : null,
+                destinationLocation: destinationLocation ? { lat: destinationLocation[0], lng: destinationLocation[1], ltd: destinationLocation[0] } : null,
+                vehicleType,
+                rideType,
+                seatsRequired
             }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
-            console.log("Ride created:", response.data);
-            setVehicleFound(true);
+            if (response.data.status === 'matched') {
+                showToast('Matched with a co-passenger!', 'success', 'SHARED RIDE MATCH');
+                setRide(response.data.ride);
+                setWaitingForDriver(true);
+            } else {
+                setVehicleFound(true);
+            }
             setConfirmRidePanel(false);
-        } catch (error) {
-            console.error('Error creating ride:', error);
-        }
+        } catch (error) {}
     };
 
     return (
-        <div className='h-screen relative overflow-hidden bg-[#fafbff] font-sans selection:bg-indigo-100 selection:text-indigo-900'>
-
-            {/* Top Command Bar */}
-            <div className='absolute top-0 left-0 w-full z-[60] p-4 md:p-6 flex justify-between items-start pointer-events-none'>
+        <div className='h-screen relative overflow-hidden bg-white font-sans selection:bg-indigo-100'>
+            {/* Minimalist Top Nav */}
+            <header className='absolute top-0 left-0 w-full z-[60] p-4 md:p-8 flex justify-between items-center pointer-events-none'>
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className='pointer-events-auto flex items-center gap-4 bg-slate-900/95 backdrop-blur-2xl px-4 md:px-6 py-2 md:py-3 rounded-[2rem] shadow-2xl shadow-black/40 border border-indigo-500/20'
-                >
-                    <div className="flex flex-col flex-1 min-h-0 p-4 md:p-5">
-                        <h1 className="text-xl md:text-3xl font-black tracking-tight leading-none">
-                            <span className="bg-gradient-to-r from-indigo-400 to-indigo-300 bg-clip-text text-transparent">
-                                Yatra
-                            </span>
-                            <span className="text-white">
-                                Ride
-                            </span>
-                        </h1>
-                    </div>
-                    <div className="pr-2 hidden md:block">
-                        <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Status</h5>
-                        <p className="text-xs font-bold text-white flex items-center gap-1.5 mt-0.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50"></span>
-                            Ready to ride
-                        </p>
-                    </div>
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="flex gap-3 pointer-events-auto"
+                    className='pointer-events-auto flex items-center gap-3 bg-white/95 backdrop-blur-2xl px-5 py-2.5 rounded-full shadow-[0_10px_30px_-5px_rgba(0,0,0,0.05)] border border-slate-100 md:hidden'
                 >
-                    <div className="hidden lg:flex items-center gap-2 bg-slate-900/95 backdrop-blur-xl px-5 py-3 rounded-[2rem] border border-indigo-500/20 shadow-2xl shadow-black/40 mr-2">
-                        <Wallet className="w-4 h-4 text-indigo-400" />
-                        <span className="text-xs font-black text-white tracking-tight">₹{stats.walletBalance?.toLocaleString() || '0'}</span>
-                    </div>
+                   <MapPin className="w-4 h-4 text-indigo-600" />
+                   <span className="text-[10px] font-black tracking-widest text-slate-900 truncate max-w-[120px] uppercase">
+                     {pickup || 'Locating...'}
+                   </span>
+                </motion.div>
 
-                    <div className="flex bg-slate-900/95 backdrop-blur-xl p-1 rounded-[2rem] border border-indigo-500/20 shadow-2xl shadow-black/40">
-                        <Link href='/messages' className='h-12 w-12 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-800 hover:text-indigo-400 transition-all'>
-                            <MessageSquare className="w-5 h-5" />
-                        </Link>
-                        <Link href='/user/profile' className='h-12 w-12 flex items-center justify-center rounded-full text-slate-400 hover:bg-indigo-600 hover:text-white transition-all'>
-                            <Bell className="w-5 h-5" />
-                        </Link>
-                        <Link href='/user/profile' className='h-12 w-12 flex items-center justify-center rounded-full text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all'>
-                            <User className="w-5 h-5" />
-                        </Link>
-                        <div className="w-px h-6 bg-indigo-500/20 self-center mx-1"></div>
-                        <Link href='/user/logout' className='h-12 w-12 flex items-center justify-center rounded-full text-red-400 hover:bg-red-500 hover:text-white transition-all'>
-                            <LogOut className="w-5 h-5" />
-                        </Link>
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className='hidden md:flex pointer-events-auto items-center gap-4 bg-white/95 backdrop-blur-2xl px-6 py-3 rounded-full shadow-xl border border-slate-100'
+                >
+                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
+                        <Navigation className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h1 className="text-xl font-black tracking-tighter text-slate-900 leading-none">Yatra<span className="text-indigo-600">Ride</span></h1>
                     </div>
                 </motion.div>
-            </div>
 
-            {/* Background Layer (The Map) */}
-            <div className='absolute inset-0 z-0 bg-slate-100'>
+                <div className="flex gap-2 pointer-events-auto">
+                    <NotificationBell />
+                    <Link href='/user/profile' className='h-12 w-12 flex items-center justify-center rounded-full bg-white/95 backdrop-blur-2xl border border-slate-100 shadow-xl text-slate-400'>
+                        <User className="w-5 h-5" />
+                    </Link>
+                </div>
+            </header>
+
+            {/* Uber Style Map */}
+            <div className='absolute inset-0 z-0'>
                 <LiveTracking pickupLocation={pickupLocation} dropLocation={destinationLocation} route={route} captains={captains} />
             </div>
 
-            {/* Central Navigation Unit (The Floating Component) */}
-            <div className={`absolute inset-y-0 left-0 w-full md:w-[420px] lg:w-[480px] pointer-events-none z-[50] flex flex-col justify-end p-0 md:p-8 transition-transform duration-500 ${(vehiclePanel || confirmRidePanel || vehicleFound || waitingForDriver) ? 'translate-y-full md:translate-y-0' : 'translate-y-0'}`}>
-                <div className='pointer-events-auto relative max-h-full flex flex-col'>
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className='bg-white rounded-t-[2.5rem] md:rounded-[3.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] overflow-y-auto no-scrollbar border border-slate-100/50 flex flex-col relative'
-                    >
-                        {/* Decorative Gradient Bar */}
-                        <div className="h-2 w-full bg-gradient-to-r from-indigo-500 via-yellow-400 to-indigo-500 sticky top-0 z-10"></div>
+            {/* Floating Navigation Sheet (Uber/Rapido Style) */}
+            <div className={`absolute bottom-0 left-0 w-full z-[80] p-0 transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${(vehiclePanel || confirmRidePanel || vehicleFound || waitingForDriver) ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+                
+                {/* Visual Handle */}
+                <div className="md:hidden flex justify-center pb-2">
+                    <div className="w-12 h-1.5 bg-slate-400/20 rounded-full" />
+                </div>
 
-                        <div className='p-4 md:p-10'>
-                            <div className="flex justify-between items-end mb-6 md:mb-10">
-                                <div>
-                                    <h4 className='text-2xl md:text-4xl font-black text-slate-900 tracking-tighter'>Search.</h4>
-                                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] mt-1">New Trip Request</p>
-                                </div>
-                                {panelOpen && (
-                                    <button onClick={() => setPanelOpen(false)} className="mb-2 p-3 bg-slate-100 rounded-2xl text-slate-500 hover:bg-indigo-600 hover:text-white transition-all shadow-lg active:scale-95">
-                                        <X className="w-6 h-6" />
-                                    </button>
-                                )}
+                <motion.div
+                    initial={{ y: 200 }}
+                    animate={{ y: 0 }}
+                    className='bg-white rounded-t-[3rem] md:rounded-[3.5rem] md:max-w-xl md:mx-auto md:mb-12 shadow-[0_-20px_50px_rgba(0,0,0,0.1)] border-t border-slate-100 px-8 pb-32 pt-8'
+                >
+                    <div className="mb-8">
+                        <h4 className='text-3xl md:text-4xl font-black text-slate-900 tracking-tighter leading-tight'>Where to, {user?.fullname?.firstname || 'Friend'}?</h4>
+                        <p className="text-indigo-600 font-bold text-[9px] uppercase tracking-widest mt-2 flex items-center gap-2">
+                           <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
+                           Smart Dispatch Active
+                        </p>
+                    </div>
+
+                    <div className="relative space-y-3">
+                         {/* Location Pill Group */}
+                         <div className="relative">
+                            <div className="absolute left-[30px] top-[30px] bottom-[30px] w-0.5 bg-slate-50 flex flex-col justify-between items-center py-1 z-10">
+                                <div className="w-3 h-3 rounded-full bg-indigo-600 ring-4 ring-indigo-50"></div>
+                                <div className="w-2.5 h-2.5 bg-slate-300 rounded-sm rotate-45"></div>
                             </div>
 
-                            <form onSubmit={(e) => e.preventDefault()} className="relative space-y-4 md:space-y-6">
-                                {/* The Connection Line */}
-                                <div className="absolute left-[24px] top-[32px] bottom-[32px] w-[3px] bg-indigo-50 flex flex-col justify-between items-center py-4">
-                                    <div className="w-3 h-3 rounded-full bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.5)]"></div>
-                                    <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                                </div>
-
-                                <div className="relative group">
-                                    <input
-                                        onClick={() => { setPanelOpen(true); setActiveField('pickup'); }}
-                                        value={pickup}
-                                        onChange={(e) => setPickup(e.target.value)}
-                                        className='w-full pl-16 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white rounded-3xl text-slate-900 font-bold transition-all outline-none placeholder:text-slate-300 shadow-sm shadow-black/5'
-                                        type="text" placeholder='Your starting point...'
-                                    />
-                                </div>
-                                <div className="relative group">
-                                    <input
-                                        onClick={() => { setPanelOpen(true); setActiveField('destination'); }}
-                                        value={destination}
-                                        onChange={(e) => setDestination(e.target.value)}
-                                        className='w-full pl-16 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white rounded-3xl text-slate-900 font-bold transition-all outline-none placeholder:text-slate-300 shadow-sm shadow-black/5'
-                                        type="text" placeholder='Where are you headed?'
-                                    />
-                                </div>
-                            </form>
-
-                            {/* Search Results Expansion */}
-                            <div ref={panelRef} className='h-0 opacity-0 overflow-hidden bg-white mt-4 px-2 pb-4'>
-                                <div className="h-px bg-slate-100 mb-6"></div>
-                                <LocationSearchPanel
-                                    suggestions={activeField === 'pickup' ? pickupSuggestions : destinationSuggestions}
-                                    setPanelOpen={setPanelOpen}
-                                    setVehiclePanel={setVehiclePanel}
-                                    setPickup={setPickup}
-                                    setDestination={setDestination}
-                                    activeField={activeField}
-                                    setPickupLocation={setPickupLocation}
-                                    setDestinationLocation={setDestinationLocation}
-                                    handleGetCurrentLocation={handleGetCurrentLocation}
-                                    setPickupSuggestions={setPickupSuggestions}
-                                    setDestinationSuggestions={setDestinationSuggestions}
-                                />
-                            </div>
-
-                            <button
-                                onClick={findTrip}
-                                className='w-full bg-slate-900 text-white rounded-[2rem] py-6 font-black mt-10 flex items-center justify-center gap-3 hover:bg-black active:scale-[0.98] transition-all shadow-2xl shadow-slate-200 uppercase tracking-widest text-sm relative overflow-hidden group'
+                            <div 
+                                onClick={() => { setPanelOpen(true); setActiveField('pickup'); }}
+                                className="w-full pl-18 pr-6 py-5 bg-slate-50 border border-slate-100 rounded-3xl cursor-pointer hover:bg-white hover:shadow-lg transition-all"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <Search className="w-5 h-5 relative z-10" /> <span className="relative z-10">Check Availability</span>
+                                <span className={`text-base font-bold truncate block ${pickup ? 'text-slate-900' : 'text-slate-400'}`}>
+                                    {pickup || 'Set current location'}
+                                </span>
+                            </div>
+
+                            <div 
+                                onClick={() => { setPanelOpen(true); setActiveField('destination'); }}
+                                className="w-full pl-18 pr-6 py-5 bg-slate-50 border border-slate-100 rounded-3xl cursor-pointer mt-3 hover:bg-white hover:shadow-lg transition-all"
+                            >
+                                <span className={`text-base font-bold truncate block ${destination ? 'text-slate-900' : 'text-slate-400'}`}>
+                                    {destination || 'Search destination'}
+                                </span>
+                            </div>
+                         </div>
+                    </div>
+
+                    <div className="flex gap-3 mt-8 overflow-x-auto no-scrollbar pb-2">
+                        {[
+                            { icon: MapPin, label: 'Add Work', col: 'text-indigo-600 bg-indigo-50' },
+                            { icon: Star, label: 'Saved', col: 'text-amber-600 bg-amber-50' },
+                            { icon: ArrowUp, label: 'Elevate', col: 'text-emerald-600 bg-emerald-50' }
+                        ].map((s, i) => (
+                            <button key={i} className={`flex items-center gap-2 ${s.col} px-6 py-3 rounded-2xl whitespace-nowrap text-[10px] font-black uppercase tracking-widest border border-black/5`}>
+                                <s.icon className="w-3.5 h-3.5" /> {s.label}
                             </button>
+                        ))}
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Expanded Location Hub (Full Screen on Mobile) */}
+            <AnimatePresence>
+                {panelOpen && (
+                    <motion.div
+                        initial={{ y: '100%' }}
+                        animate={{ y: 0 }}
+                        exit={{ y: '100%' }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                        className='fixed inset-0 z-[100] bg-white flex flex-col p-6'
+                    >
+                        <header className="flex justify-between items-center mb-8">
+                            <button onClick={() => setPanelOpen(false)} className="p-3 bg-slate-50 rounded-2xl text-slate-900">
+                                <X className="w-6 h-6" />
+                            </button>
+                            <h3 className="text-xl font-black italic tracking-tighter">PLAN TRIP.</h3>
+                            <div className="w-12 h-12" />
+                        </header>
+
+                        <div className="relative space-y-4">
+                             <div className="absolute left-[24px] top-[25px] bottom-[25px] w-0.5 bg-slate-100 flex flex-col justify-between items-center py-1">
+                                <div className="w-2.5 h-2.5 rounded-full bg-indigo-600"></div>
+                                <div className="w-2.5 h-2.5 bg-slate-300 rounded-sm rotate-45"></div>
+                            </div>
+                            <input
+                                autoFocus={activeField === 'pickup'}
+                                onFocus={() => setActiveField('pickup')}
+                                value={pickup}
+                                onChange={(e) => setPickup(e.target.value)}
+                                className='w-full pl-14 pr-8 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600/10 rounded-2xl text-slate-900 font-bold text-lg outline-none'
+                                placeholder='Pickup Hub'
+                            />
+                            <input
+                                autoFocus={activeField === 'destination'}
+                                onFocus={() => setActiveField('destination')}
+                                value={destination}
+                                onChange={(e) => setDestination(e.target.value)}
+                                className='w-full pl-14 pr-8 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600/10 rounded-2xl text-slate-900 font-bold text-lg outline-none'
+                                placeholder='Destination Matrix'
+                            />
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto no-scrollbar mt-6">
+                            <LocationSearchPanel
+                                suggestions={activeField === 'pickup' ? pickupSuggestions : destinationSuggestions}
+                                setPanelOpen={setPanelOpen}
+                                setVehiclePanel={setVehiclePanel}
+                                setPickup={setPickup}
+                                setDestination={setDestination}
+                                activeField={activeField}
+                                setPickupLocation={setPickupLocation}
+                                setDestinationLocation={setDestinationLocation}
+                                handleGetCurrentLocation={handleGetCurrentLocation}
+                                setPickupSuggestions={setPickupSuggestions}
+                                setDestinationSuggestions={setDestinationSuggestions}
+                            />
+                        </div>
+
+                        <button
+                            onClick={findTrip}
+                            disabled={!pickup || !destination}
+                            className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-bold text-xs uppercase tracking-widest shadow-2xl transition-all active:scale-95 disabled:opacity-20 mb-4"
+                        >
+                            Confirm Selection
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Bottom Nav (Mobile Only) */}
+            <BottomNav type="user" />
+
+            {/* Slide-up Interaction Layers */}
+            <AnimatePresence>
+                {vehiclePanel && (
+                    <motion.div
+                        drag="y"
+                        dragConstraints={{ top: 0, bottom: 200 }}
+                        dragElastic={0.2}
+                        onDragEnd={(e, { offset, velocity }) => { if (offset.y > 100 || velocity.y > 500) setVehiclePanel(false); }}
+                        initial={{ y: '100%', opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: '100%', opacity: 0 }}
+                        className='fixed bottom-0 left-0 w-full md:left-1/2 md:-translate-x-1/2 md:bottom-8 md:w-[600px] z-[90]'
+                    >
+                        <div className="bg-white rounded-t-[3rem] md:rounded-[3rem] shadow-[0_-20px_60px_rgba(0,0,0,0.1)] border-t border-slate-100 overflow-hidden h-[85vh] md:h-[80vh] flex flex-col pt-3">
+                            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4" />
+                            <VehiclePanel selectVehicle={setVehicleType} fare={fare} setConfirmRidePanel={setConfirmRidePanel} setVehiclePanel={setVehiclePanel} rideType={rideType} setRideType={setRideType} seatsRequired={seatsRequired} setSeatsRequired={setSeatsRequired} />
                         </div>
                     </motion.div>
-                </div>
-            </div>
+                )}
+            </AnimatePresence>
 
-            {/* Overlays / Action Sheets (Neo-Sheets) */}
-            <div ref={vehiclePanelRef} className='fixed bottom-0 left-0 w-full md:left-6 md:bottom-6 md:w-[400px] lg:w-[440px] z-[70] translate-y-full px-0 pb-0 md:px-0 md:pb-0 pointer-events-none'>
-                <div className="bg-white rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.2)] pointer-events-auto border border-slate-100/50 max-h-[90vh] md:max-h-[72vh] pb-[env(safe-area-inset-bottom,2rem)] overflow-hidden flex flex-col">
-                    <VehiclePanel selectVehicle={setVehicleType} fare={fare} setConfirmRidePanel={setConfirmRidePanel} setVehiclePanel={setVehiclePanel} />
-                </div>
-            </div>
+            <AnimatePresence>
+                {confirmRidePanel && (
+                    <motion.div
+                        drag="y"
+                        dragConstraints={{ top: 0, bottom: 200 }}
+                        dragElastic={0.2}
+                        onDragEnd={(e, { offset, velocity }) => { if (offset.y > 100 || velocity.y > 500) setConfirmRidePanel(false); }}
+                        initial={{ y: '100%', opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: '100%', opacity: 0 }}
+                        className='fixed bottom-0 left-0 w-full md:left-1/2 md:-translate-x-1/2 md:bottom-8 md:w-[600px] z-[100]'
+                    >
+                        <div className="bg-white rounded-t-[3rem] md:rounded-[3rem] shadow-[0_-20px_60px_rgba(0,0,0,0.1)] border-t border-slate-100 overflow-hidden h-[85vh] md:h-[80vh] flex flex-col pt-3">
+                            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4" />
+                            <ConfirmRide createRide={createRide} pickup={pickup} destination={destination} fare={fare} vehicleType={vehicleType} setConfirmRidePanel={setConfirmRidePanel} setVehicleFound={setVehicleFound} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-            <div ref={confirmRidePanelRef} className='fixed bottom-0 left-0 w-full md:left-6 md:bottom-6 md:w-[400px] lg:w-[440px] z-[80] translate-y-full px-0 pb-0 md:px-0 md:pb-0 pointer-events-none'>
-                <div className="bg-white rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.2)] pointer-events-auto border border-slate-100/50 max-h-[90vh] md:max-h-[72vh] pb-[env(safe-area-inset-bottom,2rem)] overflow-hidden flex flex-col">
-                    <ConfirmRide createRide={createRide} pickup={pickup} destination={destination} fare={fare} vehicleType={vehicleType} setConfirmRidePanel={setConfirmRidePanel} setVehicleFound={setVehicleFound} />
-                </div>
-            </div>
+            <AnimatePresence>
+                {vehicleFound && (
+                    <motion.div
+                        initial={{ y: '100%', opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: '100%', opacity: 0 }}
+                        className='fixed bottom-0 left-0 w-full md:left-1/2 md:-translate-x-1/2 md:bottom-8 md:w-[600px] z-[110]'
+                    >
+                        <div className="bg-white rounded-t-[3rem] md:rounded-[3rem] shadow-[0_-20px_60px_rgba(0,0,0,0.1)] border-t border-slate-100 overflow-hidden h-[85vh] md:h-[80vh] flex flex-col pt-3 text-slate-900">
+                             <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4" />
+                             <LookingForDriver setVehicleFound={setVehicleFound} pickup={pickup} destination={destination} fare={fare} vehicleType={vehicleType} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-            <div ref={vehicleFoundRef} className='fixed bottom-0 left-0 w-full md:left-6 md:bottom-6 md:w-[400px] lg:w-[440px] z-[90] translate-y-full px-0 pb-0 md:px-0 md:pb-0 pointer-events-none'>
-                <div className="bg-white rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.2)] pointer-events-auto border border-slate-100/50 max-h-[85vh] md:max-h-[72vh] pb-6 overflow-hidden flex flex-col">
-                    <LookingForDriver setVehicleFound={setVehicleFound} pickup={pickup} destination={destination} fare={fare} vehicleType={vehicleType} />
-                </div>
-            </div>
+            <AnimatePresence>
+                {waitingForDriver && (
+                    <motion.div
+                        initial={{ y: '100%', opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: '100%', opacity: 0 }}
+                        className='fixed bottom-0 left-0 w-full md:left-1/2 md:-translate-x-1/2 md:bottom-8 md:w-[600px] z-[120]'
+                    >
+                        <div className="bg-white rounded-t-[3rem] md:rounded-[3rem] shadow-[0_-20px_60px_rgba(0,0,0,0.1)] border-t border-slate-100 overflow-hidden h-[85vh] md:h-[80vh] flex flex-col pt-3 text-slate-900">
+                             <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4" />
+                             <WaitingForDriver ride={ride} setVehicleFound={setVehicleFound} setWaitingForDriver={setWaitingForDriver} waitingForDriver={waitingForDriver} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-            <div ref={waitingForDriverRef} className='fixed bottom-0 left-0 w-full md:left-6 md:bottom-6 md:w-[400px] lg:w-[440px] z-[100] translate-y-full px-0 pb-0 md:px-0 md:pb-0 pointer-events-none'>
-                <div className="bg-white rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.2)] pointer-events-auto border border-slate-100/50 text-slate-800 max-h-[85vh] md:max-h-[72vh] pb-6 overflow-hidden flex flex-col">
-                    <WaitingForDriver ride={ride} setVehicleFound={setVehicleFound} setWaitingForDriver={setWaitingForDriver} waitingForDriver={waitingForDriver} />
-                </div>
-            </div>
-
-            {/* Subtle Texture/Grain */}
-            <div className="absolute inset-0 z-[1] opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+            {/* Overlay Matrix Grain */}
+            <div className="absolute inset-0 z-[1] opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
         </div>
     );
 };

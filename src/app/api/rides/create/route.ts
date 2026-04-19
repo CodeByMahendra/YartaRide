@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromToken } from '@/lib/auth';
 import { createRide } from '@/lib/services/ride-service';
 import connectToDb from '@/lib/db';
+import { createNotification } from '@/lib/services/notification-service';
 
 export async function POST(req: NextRequest) {
     try {
@@ -31,6 +32,14 @@ export async function POST(req: NextRequest) {
         if (io) {
             io.emit('new-ride', ride);
         }
+
+        await createNotification({
+            recipient: user._id.toString(),
+            recipientModel: 'user',
+            title: 'Ride Requested',
+            message: `Looking for nearby captains for your ride to ${destination.split(',')[0]}.`,
+            type: 'ride'
+        });
 
         return NextResponse.json(ride, { status: 201 });
     } catch (error: any) {

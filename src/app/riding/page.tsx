@@ -6,242 +6,253 @@ import axios from 'axios';
 import LiveTracking from '@/components/LiveTracking';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Phone, MessageSquare, ShieldCheck, MapPin,
-    Navigation, Timer, Star, CheckCircle2, ChevronUp,
-    Shield, Wallet, ArrowRight, Share2, AlertTriangle,
-    X, ThumbsUp
+   Phone, MessageSquare, ShieldCheck, MapPin,
+   Navigation, Timer, Star, CheckCircle2, ChevronUp,
+   Shield, Wallet, ArrowRight, Share2, AlertTriangle,
+   X, ThumbsUp
 } from 'lucide-react';
 
 const RidingContent = () => {
-    const searchParams = useSearchParams();
-    const rideId = searchParams.get('rideId');
-    const [ride, setRide] = useState<any>(null);
-    const [showSOS, setShowSOS] = useState(false);
-    const [ratingModal, setRatingModal] = useState(false);
-    const [rating, setRating] = useState(0);
-    const [captainLocation, setCaptainLocation] = useState<[number, number] | null>(null);
-    const { socket } = useContext(SocketDataContext);
-    const router = useRouter();
+   const searchParams = useSearchParams();
+   const rideId = searchParams.get('rideId');
+   const [ride, setRide] = useState<any>(null);
+   const [showSOS, setShowSOS] = useState(false);
+   const [ratingModal, setRatingModal] = useState(false);
+   const [rating, setRating] = useState(0);
+   const [captainLocation, setCaptainLocation] = useState<[number, number] | null>(null);
+   const { socket } = useContext(SocketDataContext);
+   const router = useRouter();
 
-    useEffect(() => {
-        const fetchRide = async () => {
-            if (!rideId) return;
-            try {
-                const res = await axios.get(`/api/rides/details?rideId=${rideId}`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                });
-                setRide(res.data);
-            } catch (err) {
-                console.error("Error fetching ride:", err);
+   useEffect(() => {
+      const fetchRide = async () => {
+         if (!rideId) return;
+         try {
+            const res = await axios.get(`/api/rides/details?rideId=${rideId}`, {
+               headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            setRide(res.data);
+         } catch (err: any) {
+            console.error("Error fetching ride:", err);
+         }
+      };
+      fetchRide();
+
+      if (socket) {
+         socket.on('ride-started', (data: any) => {
+            setRide(data);
+         });
+
+         socket.on('ride-ended', () => {
+            setRatingModal(true);
+         });
+
+         socket.on('update-location-captain', (data: any) => {
+            if (data.location) {
+               setCaptainLocation([data.location.ltd, data.location.lng]);
             }
-        };
-        fetchRide();
+         });
+      }
+      return () => {
+         socket?.off('ride-started');
+         socket?.off('ride-ended');
+         socket?.off('update-location-captain');
+      };
+   }, [socket, router, rideId]);
 
-        if (socket) {
-            socket.on('ride-started', (data: any) => {
-                setRide(data);
-            });
+   return (
+      <div className='h-screen relative overflow-hidden bg-slate-50 font-sans selection:bg-indigo-100'>
+         {/* Premium Background Elements */}
+         <div className="absolute top-0 right-0 w-[45%] h-[45%] bg-indigo-100/50 rounded-full blur-[120px] pointer-events-none"></div>
+         <div className="absolute bottom-0 left-0 w-[35%] h-[35%] bg-blue-50/50 rounded-full blur-[100px] pointer-events-none"></div>
 
-            socket.on('ride-ended', () => {
-                setRatingModal(true);
-            });
+         {/* Interactive Map Layer */}
+         <div className='absolute inset-0 z-0 bg-slate-100'>
+            <LiveTracking
+               pickupLocation={captainLocation}
+               dropLocation={ride?.destinationLocation?.coordinates ? [ride.destinationLocation.coordinates[1], ride.destinationLocation.coordinates[0]] : null}
+               route={[]}
+            />
+         </div>
 
-            socket.on('update-location-captain', (data: any) => {
-                if (data.location) {
-                    setCaptainLocation([data.location.ltd, data.location.lng]);
-                }
-            });
-        }
-        return () => {
-            socket?.off('ride-started');
-            socket?.off('ride-ended');
-            socket?.off('update-location-captain');
-        };
-    }, [socket, router, rideId]);
+         {/* Floating Status Bar */}
+         <header className="absolute top-0 left-0 w-full z-[60] p-6 md:p-8 pointer-events-none">
+            <motion.div
+               initial={{ y: -40, opacity: 0 }}
+               animate={{ y: 0, opacity: 1 }}
+               className="mx-auto max-w-sm bg-white/95 backdrop-blur-xl rounded-3xl p-5 flex items-center justify-between pointer-events-auto border border-slate-100 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08)]"
+            >
+               <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-100">
+                     <Navigation className="w-5 h-5 animate-bounce" />
+                  </div>
+                  <div>
+                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none block">Transit Status</span>
+                     <p className="text-sm font-black text-slate-900 tracking-tight mt-1">In Real-time Flow</p>
+                  </div>
+               </div>
+               <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 shadow-inner">
+                  <span className="text-indigo-600 font-bold text-xs">8 MIN</span>
+               </div>
+            </motion.div>
+         </header>
 
-    return (
-        <div className='h-screen relative overflow-hidden bg-slate-950 font-sans'>
+         {/* Active Session Management */}
+         <div className="absolute bottom-0 left-0 w-full z-[50] p-0 md:p-8 pointer-events-none">
+            <motion.div
+               initial={{ y: 150, opacity: 0 }}
+               animate={{ y: 0, opacity: 1 }}
+               className="max-w-xl mx-auto bg-white rounded-t-[3.5rem] md:rounded-[4rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)] pointer-events-auto p-10 md:p-12 border border-slate-100 relative overflow-hidden"
+            >
+               {/* Pulse Progress Stream */}
+               <div className="absolute top-0 left-0 w-full h-1 bg-slate-50">
+                  <motion.div
+                     initial={{ width: "20%" }}
+                     animate={{ width: "75%" }}
+                     transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+                     className="h-full bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
+                  />
+               </div>
 
-            {/* Live Map Background */}
-            <div className='absolute inset-0 z-0 bg-slate-900'>
-                <LiveTracking
-                    pickupLocation={captainLocation}
-                    dropLocation={ride?.destinationLocation ? [ride.destinationLocation.ltd, ride.destinationLocation.lng] : null}
-                    route={[]}
-                />
-            </div>
+               <div className="flex justify-between items-start mb-10 mt-2">
+                  <div className="space-y-3">
+                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-100 shadow-sm">
+                        <ShieldCheck className="w-3.5 h-3.5" /> SECURE LINK ACTIVE
+                     </div>
+                     <h2 className="text-5xl font-black text-slate-900 tracking-tighter leading-none">Riding.</h2>
+                     <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-2">{ride?.rideType || 'Standard'} Mode Initialized</p>
+                  </div>
+                  <div className="relative">
+                     <div className="w-20 h-20 rounded-[2.5rem] bg-slate-50 p-1 border-2 border-slate-100 overflow-hidden shadow-2xl shadow-indigo-100">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=2574&auto=format&fit=crop" alt="Captain" className="w-full h-full object-cover rounded-[2rem]" />
+                     </div>
+                     <motion.div 
+                        initial={{ scale: 0 }} animate={{ scale: 1 }}
+                        className="absolute -bottom-1 -right-1 w-8 h-8 bg-indigo-600 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg text-white"
+                     >
+                        <ThumbsUp className="w-3.5 h-3.5" />
+                     </motion.div>
+                  </div>
+               </div>
 
-            {/* Top Navigation Status */}
-            <div className="absolute top-0 left-0 w-full z-[60] p-6 pointer-events-none">
-                <motion.div
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className="mx-auto max-w-sm bg-slate-900/90 backdrop-blur-xl rounded-[2rem] p-4 flex items-center justify-between pointer-events-auto border border-indigo-500/20 shadow-2xl shadow-black/50"
-                >
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-                            <Navigation className="w-5 h-5 animate-pulse" />
+               {/* Fleet & Commander Info Grid */}
+               <div className="grid grid-cols-2 gap-4 mb-10">
+                  <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100 text-center shadow-sm">
+                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Fleet Plate</span>
+                     <p className="text-slate-900 font-black text-lg tracking-tight leading-none">{ride?.captain?.vehicle?.plate || 'MP09 AB 1234'}</p>
+                     <p className="text-[9px] text-indigo-500 font-bold uppercase mt-2 tracking-tight">{ride?.captain?.vehicle?.model || 'Titan Series'}</p>
+                  </div>
+                  <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100 text-center shadow-sm">
+                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Commander</span>
+                     <div className="flex items-center justify-center gap-2">
+                        <p className="text-slate-900 font-black text-lg tracking-tight leading-none">{ride?.captain?.fullname?.firstname || 'Captain'}</p>
+                        <div className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg shadow-sm border border-slate-100">
+                           <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                           <span className="text-[9px] font-black text-slate-900">4.9</span>
                         </div>
-                        <div>
-                            <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Mission Status</h5>
-                            <p className="text-sm font-black text-white italic">In-Transit</p>
-                        </div>
-                    </div>
-                    <div className="bg-indigo-500/10 px-4 py-2 rounded-2xl border border-indigo-500/20">
-                        <span className="text-indigo-400 font-black text-sm">8 min left</span>
-                    </div>
-                </motion.div>
-            </div>
+                     </div>
+                     <p className="text-[9px] text-slate-400 font-bold uppercase mt-2 tracking-tight">Level 5 Pilot</p>
+                  </div>
+               </div>
 
-            {/* Bottom Panel - Dynamic Overlay */}
-            <div className="absolute bottom-0 left-0 w-full z-[50] p-0 md:p-6 pointer-events-none">
-                <motion.div
-                    initial={{ y: 100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className="max-w-md mx-auto bg-slate-900/95 backdrop-blur-xl rounded-t-[2.5rem] md:rounded-[3.5rem] shadow-2xl shadow-black/60 pointer-events-auto p-6 md:p-10 border border-indigo-500/20 relative overflow-hidden"
-                >
-                    {/* Visual Progress Bar */}
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-800">
-                        <motion.div
-                            initial={{ width: "30%" }}
-                            animate={{ width: "65%" }}
-                            transition={{ duration: 10, repeat: Infinity }}
-                            className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                        />
-                    </div>
+               {/* Visual Route Info */}
+               <div className="bg-white rounded-[3rem] p-8 border border-slate-100 mb-10 shadow-xl shadow-black/[0.02] relative group">
+                  <div className="flex gap-6 items-start">
+                     <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center flex-shrink-0 text-white shadow-xl shadow-indigo-100">
+                        <MapPin className="w-6 h-6" />
+                     </div>
+                     <div className="flex-1 min-w-0">
+                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest block mb-2">Primary Objective</span>
+                        <p className="text-lg font-black text-slate-900 leading-tight tracking-tighter truncate">{ride?.destination || 'Destination Name'}</p>
+                     </div>
+                  </div>
+                  <div className="h-px bg-slate-50 my-6"></div>
+                  <div className="flex justify-between items-center">
+                     <div>
+                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest block mb-1">Contract Value</span>
+                        <p className="text-3xl font-black text-slate-900 tracking-tighter italic leading-none">₹{ride?.fare || '240'}</p>
+                     </div>
+                     <div className="bg-indigo-600 text-white px-5 py-3 rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest">Cash Sync</span>
+                        <Wallet className="w-4 h-4" />
+                     </div>
+                  </div>
+               </div>
 
-                    <div className="flex justify-between items-start mb-10">
-                        <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-4 border border-indigo-500/20">
-                                <ShieldCheck className="w-3 h-3" /> Secure Ride
-                            </div>
-                            <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter">On Route.</h2>
-                            <p className="text-slate-500 font-bold text-xs mt-1">Arriving at destination shortly</p>
-                        </div>
-                        <div className="w-16 h-16 rounded-[1.5rem] bg-slate-800 border-2 border-indigo-500/20 overflow-hidden shadow-xl shadow-black/40">
-                            <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=2574&auto=format&fit=crop" alt="Captain" className="w-full h-full object-cover" />
-                        </div>
-                    </div>
+               {/* Interaction Control */}
+               <div className="space-y-4">
+                  <div className="flex gap-4">
+                     <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        className="flex-1 py-6 bg-slate-900 text-white rounded-3xl font-black flex items-center justify-center gap-3 shadow-2xl transition-all text-[11px] uppercase tracking-widest"
+                     >
+                        <Phone className="w-5 h-5 text-indigo-400" /> Contact Pilot
+                     </motion.button>
+                     <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => router.push(`/messages?partnerId=${ride?.captain?._id}&partnerType=captain&partnerName=${ride?.captain?.fullname?.firstname}&rideId=${ride?._id}`)}
+                        className="flex-1 py-6 bg-indigo-50 text-indigo-700 rounded-3xl font-black flex items-center justify-center gap-3 shadow-xl transition-all text-[11px] uppercase tracking-widest border border-indigo-100"
+                     >
+                        <MessageSquare className="w-5 h-5" /> Chat
+                     </motion.button>
+                     <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowSOS(true)}
+                        className="w-20 py-6 bg-rose-50 text-rose-600 rounded-3xl flex items-center justify-center border border-rose-100 shadow-lg"
+                     >
+                        <Shield className="w-6 h-6" />
+                     </motion.button>
+                  </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-8">
-                        <div className="bg-slate-950 p-4 rounded-3xl border border-slate-800 text-center hover:border-indigo-500/30 transition-colors">
-                            <h5 className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Vehicle</h5>
-                            <p className="text-white font-bold">{ride?.captain?.vehicle?.plate || 'MP09 AB 1234'}</p>
-                            <p className="text-[10px] text-slate-500 mt-1">{ride?.captain?.vehicle?.model || 'Suzuki Swift'}</p>
-                        </div>
-                        <div className="bg-slate-950 p-4 rounded-3xl border border-slate-800 text-center hover:border-indigo-500/30 transition-colors">
-                            <h5 className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Captain</h5>
-                            <div className="flex items-center justify-center gap-1">
-                                <span className="text-white font-bold">{ride?.captain?.fullname?.firstname || 'Sarthak'}</span>
-                                <Star className="w-3 h-3 text-indigo-400 fill-indigo-400" />
-                                <span className="text-xs text-indigo-400 font-bold">4.9</span>
-                            </div>
-                        </div>
-                    </div>
+                  <motion.button
+                     whileHover={{ scale: 1.01, backgroundColor: '#4338ca' }}
+                     whileTap={{ scale: 0.99 }}
+                     className="w-full py-7 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-indigo-100 transition-all border border-indigo-500"
+                  >
+                     Complete Transfer & Exit
+                  </motion.button>
+               </div>
+            </motion.div>
+         </div>
 
-                    <div className="bg-slate-950 rounded-[2.5rem] p-6 border border-slate-800 mb-8">
-                        <div className="flex gap-4 items-start relative pb-6 border-b border-dashed border-slate-800">
-                            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center flex-shrink-0 text-slate-400 mt-1">
-                                <MapPin className="w-4 h-4 text-indigo-400" />
-                            </div>
-                            <div>
-                                <h5 className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Destination</h5>
-                                <p className="text-sm font-bold text-white leading-snug">{ride?.destination || 'Phoenix Citadel Mall, Indore, MP'}</p>
-                            </div>
-                        </div>
-                        <div className="flex justify-between items-center pt-4">
-                            <div className="text-left">
-                                <h5 className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Total Fare</h5>
-                                <span className="text-lg font-black text-white">₹{ride?.fare || '...'}</span>
-                            </div>
-                            <div className="flex gap-2">
-                                <div className="text-right">
-                                    <h5 className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Payment</h5>
-                                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
-                                        Cash <Wallet className="w-3 h-3" />
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+         {/* Texture Layer */}
+         <div className="absolute inset-0 z-[1] opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
 
-                    <div className="flex gap-3">
-                        <button className="flex-1 py-4 bg-slate-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-700 transition-all active:scale-95 text-xs uppercase tracking-widest">
-                            <Phone className="w-4 h-4" /> Call
-                        </button>
-                        <button
-                            onClick={() => router.push(`/messages?partnerId=${ride?.captain?._id}&partnerType=captain&partnerName=${ride?.captain?.fullname?.firstname}&rideId=${ride?._id}`)}
-                            className="flex-1 py-4 bg-slate-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-700 transition-all active:scale-95 text-xs uppercase tracking-widest"
-                        >
-                            <MessageSquare className="w-4 h-4" /> Chat
-                        </button>
-                        <button
-                            onClick={() => setShowSOS(true)}
-                            className="w-14 py-4 bg-rose-500/10 text-rose-500 rounded-2xl font-bold flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-95 border border-rose-500/20"
-                        >
-                            <Shield className="w-5 h-5" />
-                        </button>
-                    </div>
+         {/* Security Alerts */}
+         <AnimatePresence>
+            {showSOS && (
+               <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-6"
+               >
+                  <motion.div
+                     initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+                     className="bg-white w-full max-w-sm rounded-[3.5rem] p-10 text-center shadow-[0_40px_100px_-20px_rgba(244,63,94,0.3)] border border-rose-50 relative overflow-hidden"
+                  >
+                     <div className="w-24 h-24 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-8 border border-rose-100 shadow-inner">
+                        <AlertTriangle className="w-12 h-12 text-rose-500" />
+                     </div>
+                     <h2 className="text-4xl font-black text-slate-900 tracking-tighter mb-4 leading-none">SOS Alert</h2>
+                     <p className="text-slate-400 text-sm mb-10 font-bold leading-relaxed uppercase tracking-tight">Active mission distress signal. Remote support task-force will be deployed immediately.</p>
 
-                    <button
-                        onClick={() => {
-                            // Make payment logic
-                            router.push('/home');
-                        }}
-                        className="w-full mt-4 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:shadow-2xl hover:shadow-indigo-500/40 transition-all active:scale-[0.98]"
-                    >
-                        Make Payment
-                    </button>
-                </motion.div>
-            </div>
+                     <div className="space-y-4 relative z-10">
+                        <button className="w-full py-5 bg-rose-600 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-rose-200 transition-all">Invoke Emergency Protocol</button>
+                        <button onClick={() => setShowSOS(false)} className="w-full py-5 bg-slate-50 text-slate-400 rounded-3xl font-black uppercase tracking-widest text-[10px] hover:text-slate-900 transition-all">Disengage Signal</button>
+                     </div>
+                  </motion.div>
+               </motion.div>
+            )}
+         </AnimatePresence>
 
-            {/* SOS Modal */}
-            <AnimatePresence>
-                {showSOS && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            className="bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 text-center border border-rose-500/30 shadow-2xl shadow-rose-900/40 relative overflow-hidden"
-                        >
-                            <div className="absolute inset-0 bg-rose-500/5 animate-pulse"></div>
-                            <div className="w-20 h-20 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-rose-500 border border-rose-500/30">
-                                <AlertTriangle className="w-10 h-10" />
-                            </div>
-                            <h2 className="text-3xl font-black text-white tracking-tighter mb-2">Emergency SOS</h2>
-                            <p className="text-slate-400 text-sm mb-8 font-medium">This will immediately alert our emergency response team and share your live location with authorities.</p>
-
-                            <div className="space-y-3 relative z-10">
-                                <button className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-rose-700 shadow-xl shadow-rose-600/30 transition-all flex items-center justify-center gap-2">
-                                    <Shield className="w-4 h-4" /> Alert Authorities
-                                </button>
-                                <button
-                                    onClick={() => setShowSOS(false)}
-                                    className="w-full py-4 bg-slate-800 text-slate-400 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-700 hover:text-white transition-all"
-                                >
-                                    Cancel Alert
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-        </div>
-    );
+      </div>
+   );
 };
 
 const Riding = () => {
-    return (
-        <Suspense fallback={<div className="h-screen w-full bg-slate-950 flex items-center justify-center text-indigo-500"><div className="w-8 h-8 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div></div>}>
-            <RidingContent />
-        </Suspense>
-    );
+   return (
+      <Suspense fallback={<div className="h-screen w-full bg-slate-50 flex items-center justify-center text-indigo-600"><div className="w-12 h-12 rounded-full border-[6px] border-indigo-600 border-t-transparent animate-spin"></div></div>}>
+         <RidingContent />
+      </Suspense>
+   );
 }
 
 export default Riding;

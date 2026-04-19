@@ -1,220 +1,402 @@
 'use client';
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { CaptainDataContext } from '@/context/CaptainDataContext';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Car, Zap, ShieldCheck, Trophy, BadgeCheck } from 'lucide-react';
+import {
+    Phone, Mail, ArrowRight, ShieldCheck,
+    ChevronLeft, Loader2, CheckCircle2, User as UserIcon,
+    Car, Hash, Palette, Star, Navigation, RefreshCw, Sparkles
+} from 'lucide-react';
+import { useToast } from '@/context/ToastContext';
+import { useCaptain } from '@/context/CaptainDataContext';
 
-const CaptainLogin = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-
-    const { setCaptain } = useContext(CaptainDataContext);
-    const router = useRouter();
-
-    const submitHandler = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-
-        try {
-            const response = await axios.post('/api/captain/login', { email, password });
-            if (response.status === 200) {
-                const data = response.data;
-                setCaptain(data.captain);
-                localStorage.setItem('token', data.token);
-                router.push('/captain-home');
-            }
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Login failed. Please check your captain credentials.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
+/* ── Step Indicator ─────────────────────────────────── */
+const StepDots = ({ step }: { step: 'phone' | 'otp' | 'profile' }) => {
+    const steps = ['phone', 'otp', 'profile'];
+    const idx = steps.indexOf(step);
     return (
-        <div className="flex min-h-screen w-full bg-white font-sans overflow-hidden">
-
-            {/* Left Section - Professional Narrative */}
-            <div className="hidden lg:flex lg:w-[55%] relative bg-slate-900 items-center justify-center p-16 overflow-hidden">
-                {/* Indigo Lights for Captain Theme */}
-                <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-600/10 rounded-full blur-[160px]"></div>
-                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[140px]"></div>
-
-                <div className="relative z-10 w-full max-w-2xl">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <div className="flex items-center gap-4 mb-12">
-                            <h1 className="text-4xl font-black tracking-tight">
-                                <span className="bg-gradient-to-r from-indigo-400 to-indigo-300 bg-clip-text text-transparent">
-                                    Yatra
-                                </span>
-                                <span className="text-white">
-                                    Ride
-                                </span>
-                            </h1>
-                            <div className="px-3 py-1 rounded-full border border-indigo-500/30 text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] bg-indigo-500/5">Captain Elite</div>
-                        </div>
-
-                        <h2 className="text-7xl font-black text-white leading-[1.1] tracking-tighter mb-10">
-                            Command Your<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-200">Earnings & Freedom.</span>
-                        </h2>
-                    </motion.div>
-
-                    <div className="grid grid-cols-2 gap-8 mt-16">
-                        {[
-                            { icon: BadgeCheck, title: "Verified Partner", desc: "Access the highest-rated commuters in the region." },
-                            { icon: Trophy, title: "Peak Rewards", desc: "Earn up to 25% more during high-demand hours." },
-                        ].map((item, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.5 + idx * 0.1 }}
-                                className="group relative bg-white/5 border border-white/5 p-8 rounded-[2.5rem] backdrop-blur-3xl hover:bg-white/10 transition-all cursor-default"
-                            >
-                                <item.icon className="w-10 h-10 text-indigo-400 mb-6" />
-                                <h4 className="text-white font-black text-xl mb-2">{item.title}</h4>
-                                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-
-                    {/* Stats Mock */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1 }}
-                        className="mt-20 border-t border-white/5 pt-10"
-                    >
-                        <div className="flex gap-16">
-                            <div>
-                                <h3 className="text-3xl font-black text-white italic tracking-tighter">₹45k+</h3>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Avg. Monthly Earnings</p>
-                            </div>
-                            <div>
-                                <h3 className="text-3xl font-black text-white italic tracking-tighter">12k+</h3>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Active Captains</p>
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
-            </div>
-
-            {/* Right Form Section */}
-            <div className="w-full lg:w-[45%] flex items-center justify-center p-4 md:p-20 relative bg-slate-50">
-
+        <div className="flex items-center gap-2 mb-10">
+            {steps.map((s, i) => (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="w-full max-w-lg"
-                >
-                    <div className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-16 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.06)] border border-slate-100 relative overflow-hidden">
-
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 blur-2xl opacity-50"></div>
-
-                        <div className="relative mb-12">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-4">
-                                Captain Secure Entry
-                            </div>
-                            <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter mb-3">Captain Login.</h1>
-                            <p className="text-slate-500 font-medium">Drive into your next professional milestone.</p>
-                        </div>
-
-                        <AnimatePresence mode="wait">
-                            {error && (
-                                <motion.div
-                                    initial={{ y: -10, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    exit={{ y: -10, opacity: 0 }}
-                                    className="mb-8"
-                                >
-                                    <div className="bg-red-50 border border-red-100 text-red-600 px-6 py-4 rounded-2xl text-sm font-bold flex items-center gap-3">
-                                        <div className="w-2 h-2 rounded-full bg-red-600"></div>
-                                        {error}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-
-                        <form onSubmit={submitHandler} className="space-y-8">
-                            <div className="space-y-2">
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Fleet Email</label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                                        <Mail className="w-5 h-5" />
-                                    </div>
-                                    <input
-                                        type="email" required value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="block w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white rounded-3xl text-slate-900 font-bold transition-all outline-none placeholder:text-slate-300"
-                                        placeholder="captain@yatra.com"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Captain Key</label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                                        <Lock className="w-5 h-5" />
-                                    </div>
-                                    <input
-                                        type="password" required value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="block w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white rounded-3xl text-slate-900 font-bold transition-all outline-none placeholder:text-slate-300"
-                                        placeholder="••••••••••••"
-                                    />
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit" disabled={isLoading}
-                                className="w-full group relative bg-indigo-600 text-white rounded-[2rem] py-6 font-black flex items-center justify-center gap-3 hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-2xl shadow-indigo-500/20 disabled:opacity-70 overflow-hidden"
-                            >
-                                {isLoading ? (
-                                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                ) : (
-                                    <>
-                                        <span className="relative z-10 uppercase tracking-widest">Identify & Enter</span>
-                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
-                                    </>
-                                )}
-                            </button>
-                        </form>
-
-                        <div className="mt-12 text-center">
-                            <p className="text-slate-500 font-bold text-sm">
-                                Not a partner yet?{' '}
-                                <Link href="/captain-signup" className="text-indigo-600 font-black hover:underline underline-offset-4">Register Vehicle</Link>
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Back to User Toggle */}
-                    <div className="mt-12 flex justify-center">
-                        <Link href='/login' className="group flex items-center gap-4 bg-white px-8 py-5 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
-                            <div className="w-10 h-10 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all">
-                                <Zap className="w-5 h-5" />
-                            </div>
-                            <div className="text-left">
-                                <h4 className="font-black text-slate-900 text-xs uppercase tracking-widest">User Portal</h4>
-                                <p className="text-[10px] text-slate-400 font-bold">Standard ride booking</p>
-                            </div>
-                        </Link>
-                    </div>
-                </motion.div>
-            </div>
+                    key={s}
+                    animate={{ 
+                        width: i === idx ? 32 : 8, 
+                        backgroundColor: i === idx ? '#4f46e5' : i < idx ? '#818cf8' : '#e2e8f0' 
+                    }}
+                    className="h-2 rounded-full"
+                    transition={{ duration: 0.4, ease: "circOut" }}
+                />
+            ))}
         </div>
     );
 };
 
-export default CaptainLogin;
+/* ── OTP Input Boxes ─────────────────────────────────── */
+const OtpInput = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+    const inputs = useRef<(HTMLInputElement | null)[]>([]);
+    const digits = Array.from({ length: 6 }, (_, i) => value[i] || '');
+
+    const handleKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Backspace') {
+            const next = digits.map((d, idx) => (idx === i ? '' : d)).join('');
+            onChange(next);
+            if (i > 0) inputs.current[i - 1]?.focus();
+        }
+    };
+
+    const handleChange = (i: number, v: string) => {
+        const char = v.replace(/\D/g, '').slice(-1);
+        const next = digits.map((d, idx) => (idx === i ? char : d)).join('');
+        onChange(next.trim());
+        if (char && i < 5) inputs.current[i + 1]?.focus();
+    };
+
+    return (
+        <div className="flex gap-2 sm:gap-4 justify-center">
+            {digits.map((d, i) => (
+                <motion.input
+                    key={i}
+                    ref={el => { inputs.current[i] = el; }}
+                    type="text" inputMode="numeric" maxLength={1}
+                    value={d}
+                    onChange={e => handleChange(i, e.target.value)}
+                    onKeyDown={e => handleKey(i, e)}
+                    whileFocus={{ scale: 1.05, borderColor: '#4f46e5' }}
+                    className="w-11 h-14 sm:w-14 sm:h-18 text-center text-2xl font-black text-slate-900
+                               bg-slate-50 border-2 border-slate-100 rounded-2xl
+                               outline-none transition-all focus:bg-white focus:shadow-xl focus:shadow-indigo-100"
+                />
+            ))}
+        </div>
+    );
+};
+
+/* ── Main Page ───────────────────────────────────────── */
+const CaptainLoginPage = () => {
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [otp, setOtp] = useState('');
+    const [step, setStep] = useState<'phone' | 'otp' | 'profile'>('phone');
+    const [isLoading, setIsLoading] = useState(false);
+    const [timer, setTimer] = useState(0);
+    const [email, setEmail] = useState('');
+    const [firstname, setFirstname] = useState('');
+    const [lastname, setLastname] = useState('');
+    const [gender, setGender] = useState('male');
+    const [vehicleType, setVehicleType] = useState('car');
+    const [plate, setPlate] = useState('');
+    const [color, setColor] = useState('');
+
+    const router = useRouter();
+    const { showToast } = useToast();
+    const { setCaptain } = useCaptain();
+
+    useEffect(() => {
+        if (timer <= 0) return;
+        const t = setInterval(() => setTimer(p => p - 1), 1000);
+        return () => clearInterval(t);
+    }, [timer]);
+
+    const handleSendOtp = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (phoneNumber.length < 10) { showToast('Valid 10-digit phone required', 'error'); return; }
+        if (!email.includes('@')) { showToast('Valid email address required', 'error'); return; }
+        setIsLoading(true);
+        try {
+            await axios.post('/api/auth/email-otp/send', { phone: phoneNumber, email, role: 'captain' });
+            setStep('otp');
+            setTimer(60);
+            showToast('Authorization code sent via email!', 'success');
+        } catch (err: any) {
+            showToast(err.response?.data?.message || 'Failed to send OTP', 'error');
+        } finally { setIsLoading(false); }
+    };
+
+    const handleVerifyOtp = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (otp.length < 6) { showToast('Enter the 6-digit OTP', 'error'); return; }
+        setIsLoading(true);
+        try {
+            const res = await axios.post('/api/auth/email-otp/verify', { phone: phoneNumber, otp, role: 'captain' });
+            const { token, captain, isProfileComplete } = res.data;
+            localStorage.setItem('token', token);
+            setCaptain(captain);
+            if (isProfileComplete) {
+                showToast(`Welcome back!`, 'success');
+                router.push('/captain-home');
+            } else {
+                setStep('profile');
+                showToast('Identity verified.', 'success');
+            }
+        } catch (err: any) {
+            showToast(err.response?.data?.message || 'Invalid OTP', 'error');
+        } finally { setIsLoading(false); }
+    };
+
+    const handleCompleteProfile = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (firstname.length < 3) { showToast('Name is too short', 'error'); return; }
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post('/api/auth/complete-profile', {
+                role: 'captain',
+                fullname: { firstname, lastname },
+                email, gender,
+                vehicle: { color, plate: plate.toUpperCase(), vehicleType }
+            }, { headers: { Authorization: `Bearer ${token}` } });
+            setCaptain(res.data.captain);
+            showToast('Captain profile activated!', 'success');
+            router.push('/captain-home');
+        } catch (err: any) {
+            showToast(err.response?.data?.message || 'Activation failed', 'error');
+        } finally { setIsLoading(false); }
+    };
+
+    const inputCls = "w-full px-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-slate-900 font-bold text-sm outline-none focus:bg-white focus:border-indigo-600 transition-all placeholder:text-slate-300";
+
+    return (
+        <div className="min-h-screen w-full bg-slate-50 font-sans overflow-x-hidden relative flex flex-col">
+
+            {/* ── Premium Aesthetic Orbs ── */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-100/50 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100/30 rounded-full blur-[100px]" />
+            </div>
+
+            {/* ── Navbar ── */}
+            <header className="relative z-10 flex items-center justify-between px-6 sm:px-12 pt-8 sm:pt-12">
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-4"
+                >
+                    <div className="w-11 h-11 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-200">
+                        <Navigation className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-2xl font-black text-slate-900 tracking-tighter leading-none">
+                            Yatra<span className="text-indigo-600">Ride</span>
+                        </span>
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1 italic">Captain Node</span>
+                    </div>
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+                    <Link href="/login" className="px-6 py-3 bg-white hover:bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-500 rounded-full border border-slate-100 shadow-xl shadow-black/5 transition-all">
+                        User Login
+                    </Link>
+                </motion.div>
+            </header>
+
+            {/* ── Content ── */}
+            <div className="relative z-10 flex flex-col lg:flex-row flex-1 items-center justify-center gap-12 lg:gap-24 px-6 sm:px-12 py-12 max-w-7xl mx-auto w-full">
+
+                {/* Left - Hero Text */}
+                <motion.div
+                    initial={{ opacity: 0, x: -40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="hidden lg:flex flex-col gap-12 flex-1 max-w-lg"
+                >
+                    <AnimatePresence mode="wait">
+                        <motion.div 
+                            key={step} 
+                            initial={{ opacity: 0, y: 30 }} 
+                            animate={{ opacity: 1, y: 0 }} 
+                            exit={{ opacity: 0, y: -30 }}
+                        >
+                            <span className="px-4 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                                {step === 'phone' ? 'Fleet Onboarding' : step === 'otp' ? 'Security Gate' : 'Unit Registration'}
+                            </span>
+                            <h1 className="text-7xl font-black text-slate-900 tracking-tighter mt-8 leading-[0.9]">
+                                {step === 'phone' ? <>COMMAND<br /><span className="text-indigo-600 italic">THE ROAD.</span></> : 
+                                 step === 'otp' ? <>ACCESS<br /><span className="text-indigo-600 italic">GRANTED.</span></> : 
+                                 <>ACTIVATE<br /><span className="text-indigo-600 italic">PARTNER.</span></>}
+                            </h1>
+                            <p className="text-slate-400 text-lg mt-8 leading-relaxed max-w-md border-l-4 border-indigo-600/10 pl-8">
+                                {step === 'phone' ? "Join the elite captain network. Manage your fleet, track earnings, and drive on your schedule." :
+                                 step === 'otp' ? `We've dispatched a security token to ${email}. Authenticate to proceed.` :
+                                 "Just one more step to join the fleet. Register your vehicle to start accepting mission requests."}
+                            </p>
+                        </motion.div>
+                    </AnimatePresence>
+
+                    {/* Quick Stats Grid */}
+                    <div className="grid grid-cols-2 gap-4">
+                        {[
+                            { l: 'avg earnings', v: '₹45k+', c: 'indigo' },
+                            { l: 'active nodes', v: '25k+', c: 'blue' },
+                            { l: 'coverage', v: '120+', c: 'indigo' },
+                            { l: 'total jobs', v: '5M+', c: 'slate' },
+                        ].map((s, i) => (
+                            <div key={i} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-black/[0.02]">
+                                <h4 className={`text-2xl font-black text-${s.c}-600 tracking-tighter`}>{s.v}</h4>
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{s.l}</p>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* Right - Form Card */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="w-full max-w-md lg:max-w-md"
+                >
+                    <div className="bg-white rounded-[3.5rem] p-8 sm:p-12 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] border border-slate-100 relative overflow-hidden">
+                        
+                        <StepDots step={step} />
+
+                        <AnimatePresence mode="wait">
+                            {step === 'phone' && (
+                                <motion.div key="phone" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                    <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-4">Captain Access</h3>
+                                    <p className="text-slate-400 text-sm mb-10">Deploy your details to initialized the session.</p>
+
+                                    <form onSubmit={handleSendOtp} className="space-y-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Secure Line</label>
+                                            <div className="relative group">
+                                                <div className="absolute inset-y-0 left-0 flex items-center pl-6 pointer-events-none gap-4">
+                                                    <span className="text-sm font-black text-slate-900">+91</span>
+                                                    <div className="w-px h-5 bg-slate-100 group-focus-within:bg-indigo-600/20 transition-colors" />
+                                                </div>
+                                                <input
+                                                    type="tel" required
+                                                    value={phoneNumber}
+                                                    onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                                    placeholder="98765 43210"
+                                                    className={`${inputCls} pl-24`}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Email Node</label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                                                <input
+                                                    type="email" required
+                                                    value={email}
+                                                    onChange={e => setEmail(e.target.value)}
+                                                    placeholder="captain@yatra.ride"
+                                                    className={`${inputCls} pl-16`}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="w-full bg-slate-900 hover:bg-indigo-600 text-white py-6 rounded-3xl font-black text-[11px] uppercase tracking-[0.3em] shadow-2xl transition-all flex items-center justify-center gap-4 mt-8"
+                                        >
+                                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Request Token <ArrowRight className="w-5 h-5" /></>}
+                                        </motion.button>
+                                    </form>
+                                </motion.div>
+                            )}
+
+                            {step === 'otp' && (
+                                <motion.div key="otp" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                                    <button onClick={() => setStep('phone')} className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-600 font-black uppercase text-[9px] tracking-widest mb-8 transition-colors">
+                                        <ChevronLeft className="w-4 h-4" /> Go Back
+                                    </button>
+
+                                    <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-4">Validate</h3>
+                                    <p className="text-slate-400 text-sm mb-10 italic">Verifying identity for secure access...</p>
+
+                                    <form onSubmit={handleVerifyOtp} className="space-y-10">
+                                        <OtpInput value={otp} onChange={setOtp} />
+                                        
+                                        <div className="space-y-4">
+                                            <motion.button
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                                className="w-full bg-indigo-600 text-white py-6 rounded-3xl font-black text-[11px] uppercase tracking-[0.3em] shadow-2xl shadow-indigo-100"
+                                            >
+                                                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Verify Access"}
+                                            </motion.button>
+
+                                            <div className="text-center">
+                                                {timer > 0 ? (
+                                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Resend Window: <span className="text-indigo-600">{timer}s</span></p>
+                                                ) : (
+                                                    <button type="button" onClick={handleSendOtp} className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline decoration-2">Broadcast New Code</button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </form>
+                                </motion.div>
+                            )}
+
+                            {step === 'profile' && (
+                                <motion.div key="profile" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                                    <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-4">Finalize</h3>
+                                    <p className="text-slate-400 text-sm mb-10">Register your unit in the central network.</p>
+
+                                    <form onSubmit={handleCompleteProfile} className="space-y-6">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Callsign</label>
+                                                <input type="text" required value={firstname} onChange={e => setFirstname(e.target.value)} placeholder="Rahul" className={inputCls} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Surname</label>
+                                                <input type="text" value={lastname} onChange={e => setLastname(e.target.value)} placeholder="Sharma" className={inputCls} />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Fleet Component</label>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {['car', 'auto', 'moto'].map(v => (
+                                                    <button
+                                                        key={v} type="button"
+                                                        onClick={() => setVehicleType(v)}
+                                                        className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border-2 ${vehicleType === v ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-100'}`}
+                                                    >
+                                                        {v === 'moto' ? 'Bike' : v}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Node Plate</label>
+                                                <input type="text" required value={plate} onChange={e => setPlate(e.target.value)} placeholder="MP09AB1234" className={`${inputCls} uppercase`} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Visual Skin</label>
+                                                <input type="text" required value={color} onChange={e => setColor(e.target.value)} placeholder="White" className={inputCls} />
+                                            </div>
+                                        </div>
+
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="w-full bg-slate-900 border-2 border-slate-900 hover:bg-transparent hover:text-slate-900 py-6 rounded-3xl font-black text-[11px] uppercase tracking-[0.3em] transition-all mt-6 shadow-2xl"
+                                        >
+                                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Initialize Partner"}
+                                        </motion.button>
+                                    </form>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    <p className="text-center mt-12 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
+                        Standard Access? <Link href="/login" className="text-indigo-600 hover:underline">User Login Node →</Link>
+                    </p>
+                </motion.div>
+            </div>
+
+            <footer className="relative z-10 text-center pb-12 text-[9px] text-slate-300 font-black uppercase tracking-[0.4em]">
+                © 2026 YatraRide · Integrated Captain Core
+            </footer>
+        </div>
+    );
+};
+
+export default CaptainLoginPage;

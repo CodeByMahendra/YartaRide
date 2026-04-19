@@ -138,8 +138,8 @@ const LiveTracking = ({ pickupLocation, dropLocation, route, captains = [] }: Li
                 zoomControl={true}
             >
                 <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                 />
 
                 <MapRecenter center={mapCenter} />
@@ -165,8 +165,12 @@ const LiveTracking = ({ pickupLocation, dropLocation, route, captains = [] }: Li
                     </Marker>
                 ))}
 
-                {pickupLocation && <Marker position={pickupLocation} icon={pickupIcon} />}
-                {dropLocation && <Marker position={dropLocation} icon={dropIcon} />}
+                {pickupLocation && pickupLocation[0] !== undefined && pickupLocation[1] !== undefined && (
+                    <Marker position={pickupLocation} icon={pickupIcon} />
+                )}
+                {dropLocation && dropLocation[0] !== undefined && dropLocation[1] !== undefined && (
+                    <Marker position={dropLocation} icon={dropIcon} />
+                )}
 
                 {route && route.length > 0 && (
                     <>
