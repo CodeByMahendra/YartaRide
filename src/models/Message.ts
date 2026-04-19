@@ -25,12 +25,28 @@ const messageSchema = new Schema({
         type: String,
         required: true
     },
+    contentType: {
+        type: String,
+        enum: ['text', 'image', 'location', 'voice'],
+        default: 'text'
+    },
+    mediaUrl: {
+        type: String // Cloudinary/Storage URL for images or voice notes
+    },
+    locationData: {
+        lat: Number,
+        lng: Number,
+        address: String
+    },
     ride: {
         type: Schema.Types.ObjectId,
         ref: 'ride'
     }
 }, { timestamps: true });
 
-const Message = models.message || model('message', messageSchema);
+if (models.message) {
+    delete (mongoose as any).models.message;
+}
+const Message = model('message', messageSchema);
 
 export default Message;

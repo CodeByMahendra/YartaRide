@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connect from '@/lib/db';
 import Ride from '@/models/Ride';
 import Wallet from '@/models/Wallet';
+import User from '@/models/User';
 import { verifyJwtToken } from '@/lib/auth';
 
 export async function GET(request: Request) {
@@ -25,12 +26,21 @@ export async function GET(request: Request) {
         const ridesCount = rides.length;
         const totalSpent = rides.reduce((acc: number, ride: any) => acc + (ride.fare || 0), 0);
 
+        // Fetch referred friends
+        const referredFriendsList = await User.find({ referredBy: userId }).select('fullname createdAt firstRideCompleted');
+        const referredFriends = referredFriendsList.map((f: any) => ({
+            name: `${f.fullname?.firstname || 'Friend'} ${f.fullname?.lastname || ''}`.trim(),
+            date: f.createdAt,
+            hasCompletedFirstRide: f.firstRideCompleted
+        }));
+
         return NextResponse.json({
             stats: {
                 walletBalance,
                 ridesCount,
                 totalSpent,
-                totalDistance: ridesCount * 5 // Mocking 5km per ride for now
+                totalDistance: ridesCount * 5, // Mocking 5km per ride for now
+                referredFriends
             }
         });
 

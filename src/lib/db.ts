@@ -52,4 +52,5 @@ async function connectToDb() {
     return cached.conn;
 }
 
+export const connectDB = connectToDb;
 export default connectToDb;

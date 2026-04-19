@@ -1,318 +1,531 @@
 'use client';
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { UserDataContext } from '@/context/UserDataContext';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, ArrowRight, User, Car, Zap, ShieldCheck, Globe, Star, Phone, X, ShieldAlert } from 'lucide-react';
+import {
+  Phone, Mail, ArrowRight, ShieldCheck,
+  ChevronLeft, Loader2, CheckCircle2, User as UserIcon,
+  Sparkles, Star, Navigation, Eye, EyeOff, RefreshCw
+} from 'lucide-react';
+import { useToast } from '@/context/ToastContext';
+import { useUser } from '@/context/UserDataContext';
 
-const UserLogin = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [showMobileLogin, setShowMobileLogin] = useState(false);
-    const [otpSent, setOtpSent] = useState(false);
-
-    const { setUser } = useContext(UserDataContext);
-    const router = useRouter();
-
-    const submitHandler = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-
-        try {
-            const response = await axios.post('/api/user/login', { email, password });
-            if (response.status === 200) {
-                const data = response.data;
-                setUser(data.user);
-                localStorage.setItem('token', data.token);
-                router.push('/home');
-            }
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Check your credentials and try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div className="flex min-h-screen w-full bg-white font-sans overflow-x-hidden">
-
-            {/* Left Narrative Section */}
-            <div className="hidden lg:flex lg:w-[55%] relative bg-slate-900 items-center justify-center p-16 overflow-hidden">
-                {/* Mesh Gradient / Ambient Lights */}
-                <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-600/20 rounded-full blur-[160px] animate-pulse"></div>
-                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[140px]"></div>
-
-                <div className="relative z-10 w-full max-w-2xl">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <div className="flex items-center gap-4 mb-12">
-                            <h1 className="text-4xl font-black tracking-tight">
-                                <span className="bg-gradient-to-r from-indigo-400 to-indigo-300 bg-clip-text text-transparent">
-                                    Yatra
-                                </span>
-                                <span className="text-white">
-                                    Ride
-                                </span>
-                            </h1>
-                            <div className="px-3 py-1 rounded-full border border-white/20 text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Authentic</div>
-                        </div>
-
-                        <h2 className="text-7xl font-black text-white leading-[1.1] tracking-tighter mb-10">
-                            The Future of<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-200">Personal Mobility.</span>
-                        </h2>
-                    </motion.div>
-
-                    <div className="grid grid-cols-2 gap-8 mt-16">
-                        {[
-                            { icon: Zap, title: "Nano-Speed", desc: "Rides arriving in under 4 minutes, guaranteed." },
-                            { icon: ShieldCheck, title: "Elite Privacy", desc: "Encrypted journeys and verified captains." },
-                        ].map((item, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.5 + idx * 0.1 }}
-                                className="group relative bg-white/5 border border-white/5 p-8 rounded-[2.5rem] backdrop-blur-3xl hover:bg-white/10 transition-all cursor-default"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-all rounded-[2.5rem]"></div>
-                                <item.icon className="w-10 h-10 text-indigo-400 mb-6" />
-                                <h4 className="text-white font-black text-xl mb-2">{item.title}</h4>
-                                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1 }}
-                        className="mt-20 flex items-center gap-12"
-                    >
-                        <div className="flex -space-x-4">
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="w-12 h-12 rounded-full border-4 border-black bg-gray-800 overflow-hidden shadow-2xl">
-                                    <img src={`https://i.pravatar.cc/150?u=${i}`} alt="user" className="w-full h-full object-cover" />
-                                </div>
-                            ))}
-                        </div>
-                        <p className="text-gray-400 text-sm font-bold">Trusted by <span className="text-white">500,000+</span> daily commuters across India.</p>
-                    </motion.div>
-                </div>
-            </div>
-
-            {/* Right Form Section */}
-            <div className="w-full lg:w-[45%] flex items-center justify-center p-4 md:p-12 relative bg-slate-50/50 overflow-y-auto no-scrollbar">
-
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="w-full max-w-lg"
-                >
-                    <div className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-16 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.06)] border border-slate-100 relative overflow-hidden">
-
-                        {/* Decorative background element for form */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-
-                        <div className="relative mb-12">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-4">
-                                Personal Secure Portal
-                            </div>
-                            <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-3">Sign in.</h1>
-                            <p className="text-slate-500 font-medium">Continue your legendary journey with us.</p>
-                        </div>
-
-                        <AnimatePresence mode="wait">
-                            {error && (
-                                <motion.div
-                                    initial={{ y: -10, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    exit={{ y: -10, opacity: 0 }}
-                                    className="mb-8"
-                                >
-                                    <div className="bg-red-50 border border-red-100 text-red-600 px-6 py-4 rounded-2xl text-sm font-bold flex items-center gap-3">
-                                        <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></div>
-                                        {error}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-
-                        <form onSubmit={submitHandler} className="space-y-8">
-                            <div className="space-y-2">
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Email Identifier</label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                                        <Mail className="w-5 h-5" />
-                                    </div>
-                                    <input
-                                        type="email" required value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="block w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white rounded-3xl text-slate-900 font-bold transition-all outline-none placeholder:text-slate-300 shadow-sm shadow-black/5"
-                                        placeholder="yourname@domain.com"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Secure Password</label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                                        <Lock className="w-5 h-5" />
-                                    </div>
-                                    <input
-                                        type="password" required value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="block w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white rounded-3xl text-slate-900 font-bold transition-all outline-none placeholder:text-slate-300 shadow-sm shadow-black/5"
-                                        placeholder="••••••••••••"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-between text-sm font-bold">
-                                <label className="flex items-center gap-3 cursor-pointer text-slate-500 hover:text-indigo-600 transition-colors group">
-                                    <div className="relative w-5 h-5">
-                                        <input type="checkbox" className="sr-only peer" />
-                                        <div className="w-full h-full border-2 border-slate-200 rounded-lg group-hover:border-indigo-200 peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-all"></div>
-                                        <Zap className="absolute inset-0 m-auto w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                                    </div>
-                                    Stay signed in
-                                </label>
-                                <Link href="#" className="text-indigo-600 hover:underline">Reset Account?</Link>
-                            </div>
-
-                            <button
-                                type="submit" disabled={isLoading}
-                                className="w-full group relative bg-slate-900 text-white rounded-[2rem] py-6 font-black flex items-center justify-center gap-3 hover:bg-black active:scale-[0.98] transition-all shadow-2xl shadow-slate-200 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
-                            >
-                                {isLoading ? (
-                                    <Loader2 className="w-6 h-6 animate-spin" />
-                                ) : (
-                                    <>
-                                        <span className="relative z-10 uppercase tracking-widest">Authorize Access</span>
-                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
-                                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    </>
-                                )}
-                            </button>
-                        </form>
-
-
-                        <div className="mt-10 flex items-center gap-4 text-slate-200">
-                            <div className="h-px bg-slate-100 flex-1"></div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Identity Methods</span>
-                            <div className="h-px bg-slate-100 flex-1"></div>
-                        </div>
-
-                        <div className="mt-8 grid grid-cols-2 gap-4">
-                            <button className="flex items-center justify-center gap-3 py-5 bg-white border-2 border-slate-100 rounded-3xl font-black text-xs uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all">
-                                <img src="https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png" className="w-5 h-5" /> Google
-                            </button>
-                            <button
-                                onClick={() => setShowMobileLogin(true)}
-                                className="flex items-center justify-center gap-3 py-5 bg-white border-2 border-slate-100 rounded-3xl font-black text-xs uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all"
-                            >
-                                <Phone className="w-5 h-5 text-indigo-600" /> Phone
-                            </button>
-                        </div>
-
-                        <div className="mt-12 text-center">
-                            <p className="text-slate-500 font-bold text-sm">
-                                Not part of the ecosystem?{' '}
-                                <Link href="/signup" className="text-indigo-600 font-black hover:underline underline-offset-4">Join Now</Link>
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Mobile OTP Modal (Fake Simulation) */}
-                    <AnimatePresence>
-                        {showMobileLogin && (
-                            <motion.div
-                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-8"
-                            >
-                                <motion.div
-                                    initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-                                    className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-12 max-w-md w-full shadow-2xl relative"
-                                >
-                                    <button onClick={() => setShowMobileLogin(false)} className="absolute top-8 right-8 text-slate-300 hover:text-slate-900"><X className="w-6 h-6" /></button>
-
-                                    <div className="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center text-indigo-600 mb-8">
-                                        <Phone className="w-10 h-10" />
-                                    </div>
-                                    <h2 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Phone Identity.</h2>
-                                    <p className="text-slate-500 font-medium mb-10 text-sm">We'll send a legendary 4-digit code to your mobile.</p>
-
-                                    {!otpSent ? (
-                                        <div className="space-y-6">
-                                            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex items-center gap-4">
-                                                <span className="font-black text-slate-400">+91</span>
-                                                <input type="tel" placeholder="Mobile Number" className="bg-transparent font-black tracking-widest outline-none w-full" />
-                                            </div>
-                                            <button
-                                                onClick={() => setOtpSent(true)}
-                                                className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest flex items-center justify-center gap-3"
-                                            >
-                                                Send OTP <ArrowRight className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-6 text-center">
-                                            <div className="flex justify-center gap-4 mb-8">
-                                                {[1, 2, 3, 4].map((i) => (
-                                                    <input key={i} type="text" maxLength={1} className="w-16 h-16 bg-slate-50 border-2 border-indigo-600 rounded-2xl text-center text-2xl font-black" />
-                                                ))}
-                                            </div>
-                                            <button
-                                                onClick={() => router.push('/home')}
-                                                className="w-full py-6 bg-emerald-500 text-white rounded-[2rem] font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-emerald-200"
-                                            >
-                                                Verify & Login <ShieldCheck className="w-5 h-5" />
-                                            </button>
-                                            <p className="text-xs font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-indigo-600">Resend Code</p>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Quick Profile Toggle */}
-                    <div className="mt-12 flex justify-between gap-4">
-                        <Link href='/captain-login' className="flex-1 group bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
-                            <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all mb-4">
-                                <Car className="w-6 h-6" />
-                            </div>
-                            <h4 className="font-black text-slate-900 text-sm">Captain Login</h4>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Driving Partner</p>
-                        </Link>
-                        <div className="flex-1 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm opacity-50 grayscale">
-                            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 mb-4">
-                                <Globe className="w-6 h-6" />
-                            </div>
-                            <h4 className="font-black text-slate-900 text-sm">Admin Panel</h4>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">System Control</p>
-                        </div>
-                    </div>
-                </motion.div>
-            </div>
-        </div>
-    );
+/* ── Step Indicator ─────────────────────────────────── */
+const StepDots = ({ step }: { step: 'phone' | 'otp' | 'profile' }) => {
+  const steps = ['phone', 'otp', 'profile'];
+  const idx = steps.indexOf(step);
+  return (
+    <div className="flex items-center gap-2 mb-8">
+      {steps.map((s, i) => (
+        <motion.div
+          key={s}
+          animate={{ width: i === idx ? 28 : 8, backgroundColor: i <= idx ? '#4f46e5' : '#e2e8f0' }}
+          className="h-2 rounded-full"
+          transition={{ duration: 0.3 }}
+        />
+      ))}
+    </div>
+  );
 };
 
-// Simple Loader Component
-const Loader2 = ({ className }: { className?: string }) => (
-    <div className={className}>
-        <div className="w-full h-full border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-    </div>
-);
+/* ── OTP Input Boxes ─────────────────────────────────── */
+const OtpInput = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const inputs = useRef<(HTMLInputElement | null)[]>([]);
+  const digits = Array.from({ length: 6 }, (_, i) => value[i] || '');
 
-export default UserLogin;
+  const handleKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      const next = digits.map((d, idx) => (idx === i ? '' : d)).join('');
+      onChange(next);
+      if (i > 0) inputs.current[i - 1]?.focus();
+    }
+  };
+
+  const handleChange = (i: number, v: string) => {
+    const char = v.replace(/\D/g, '').slice(-1);
+    const next = digits.map((d, idx) => (idx === i ? char : d)).join('');
+    onChange(next.trim());
+    if (char && i < 5) inputs.current[i + 1]?.focus();
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    onChange(pasted);
+    const last = Math.min(pasted.length, 5);
+    inputs.current[last]?.focus();
+    e.preventDefault();
+  };
+
+  return (
+    <div className="flex gap-2 sm:gap-3 justify-center" onPaste={handlePaste}>
+      {digits.map((d, i) => (
+        <motion.input
+          key={i}
+          ref={el => { inputs.current[i] = el; }}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={d}
+          onChange={e => handleChange(i, e.target.value)}
+          onKeyDown={e => handleKey(i, e)}
+          whileFocus={{ scale: 1.05, borderColor: '#4f46e5' }}
+          className="w-11 h-14 sm:w-12 sm:h-16 text-center text-xl font-black text-slate-900 
+                               bg-slate-50 border-2 border-slate-200 rounded-2xl 
+                               outline-none transition-all focus:ring-4 focus:ring-indigo-50 
+                               caret-indigo-600 no-tap-highlight shadow-inner"
+        />
+      ))}
+    </div>
+  );
+};
+
+/* ── Main Page ───────────────────────────────────────── */
+const LoginPage = () => {
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<'phone' | 'otp' | 'profile'>('phone');
+  const [isLoading, setIsLoading] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [email, setEmail] = useState('');
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
+  const [gender, setGender] = useState('male');
+  const [referredByCode, setReferredByCode] = useState('');
+
+  const router = useRouter();
+  const { showToast } = useToast();
+  const { setUser } = useUser();
+
+  useEffect(() => {
+    if (timer <= 0) return;
+    const t = setInterval(() => setTimer(p => p - 1), 1000);
+    return () => clearInterval(t);
+  }, [timer]);
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (phoneNumber.length < 10) { showToast('Valid 10-digit phone required', 'error'); return; }
+    if (!email.includes('@')) { showToast('Valid email address required', 'error'); return; }
+    setIsLoading(true);
+    try {
+      await axios.post('/api/auth/email-otp/send', { phone: phoneNumber, email, role: 'user' });
+      setStep('otp');
+      setTimer(60);
+      showToast('OTP sent to your email!', 'success');
+    } catch (err: any) {
+      showToast(err.response?.data?.message || 'Failed to send OTP', 'error');
+    } finally { setIsLoading(false); }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length < 6) { showToast('Enter the 6-digit OTP', 'error'); return; }
+    setIsLoading(true);
+    try {
+      const res = await axios.post('/api/auth/email-otp/verify', { phone: phoneNumber, otp, role: 'user' });
+      const { token, user, isProfileComplete } = res.data;
+      localStorage.setItem('token', token);
+      setUser(user);
+      if (isProfileComplete) {
+        showToast(`Welcome back, ${user.fullname?.firstname}!`, 'success');
+        router.push('/home');
+      } else {
+        setStep('profile');
+        showToast('Verified! Complete your profile.', 'success');
+      }
+    } catch (err: any) {
+      showToast(err.response?.data?.message || 'Invalid OTP', 'error');
+    } finally { setIsLoading(false); }
+  };
+
+  const handleCompleteProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (firstname.length < 3) { showToast('First name must be ≥ 3 characters', 'error'); return; }
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post('/api/auth/complete-profile', {
+        role: 'user', fullname: { firstname, lastname }, email, gender, referredByCode
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      setUser(res.data.user);
+      showToast('Profile complete! Welcome aboard 🎉', 'success');
+      router.push('/home');
+    } catch (err: any) {
+      showToast(err.response?.data?.message || 'Profile update failed', 'error');
+    } finally { setIsLoading(false); }
+  };
+
+  const inputCls = "w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-slate-900 font-bold text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all placeholder:text-slate-400 no-tap-highlight shadow-inner";
+
+  return (
+    <div className="min-h-dvh w-full bg-slate-50 font-sans overflow-x-hidden relative flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+
+      {/* ── Soft Ambient Orbs ── */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-200/40 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 -left-32 w-72 h-72 bg-violet-200/30 rounded-full blur-[100px]" />
+        <div className="absolute -bottom-20 right-1/3 w-64 h-64 bg-emerald-100/40 rounded-full blur-[90px]" />
+      </div>
+
+      {/* ── Top Bar ── */}
+      <header className="relative z-10 flex items-center justify-between px-5 sm:px-12 py-8 sm:py-12">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-3"
+        >
+          <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-200">
+            <Navigation className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-2xl font-black text-slate-900 tracking-tighter">
+            Yatra<span className="text-indigo-600">Ride</span>
+          </span>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <Link
+            href="/captain-login"
+            className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-indigo-600 transition-all border-2 border-slate-100 bg-white px-6 py-3 rounded-full shadow-sm"
+          >
+            Captain Login
+          </Link>
+        </motion.div>
+      </header>
+
+      {/* ── Main Content ── */}
+      <div className="relative z-10 flex flex-col lg:flex-row flex-1 items-center justify-center gap-12 lg:gap-24 px-5 sm:px-8 py-8 sm:py-12 max-w-7xl mx-auto w-full">
+
+        {/* Left – Brand Panel */}
+        <motion.div
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="hidden lg:flex flex-col gap-10 flex-1 max-w-xl"
+        >
+          <AnimatePresence mode="wait">
+            {step === 'phone' && (
+              <motion.div key="p" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <p className="text-indigo-600 font-black text-[10px] uppercase tracking-[0.4em] mb-6">User Link-up</p>
+                <h2 className="text-7xl font-black text-slate-900 leading-[0.88] tracking-tighter mb-8 italic">
+                  YOUR NEXT<br />
+                  <span className="text-indigo-600">MISSION</span><br />
+                  BEGINS.
+                </h2>
+                <p className="text-slate-500 text-lg font-bold leading-relaxed border-l-4 border-indigo-600 pl-8">
+                  Authenticate via encrypted email protocol — seamless, rapid, and industry-grade security.
+                </p>
+              </motion.div>
+            )}
+            {step === 'otp' && (
+              <motion.div key="o" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <p className="text-emerald-600 font-black text-[10px] uppercase tracking-[0.4em] mb-6">Verification</p>
+                <h2 className="text-7xl font-black text-slate-900 leading-[0.88] tracking-tighter mb-8 italic">
+                  CHECK<br />
+                  <span className="text-emerald-500 text-6xl">INBOX</span><br />
+                  NOW.
+                </h2>
+                <p className="text-slate-500 text-lg font-bold leading-relaxed border-l-4 border-emerald-600 pl-8">
+                  Transmission sent to <span className="text-slate-900 font-black">{email}</span>. Valid for 10 minutes.
+                </p>
+              </motion.div>
+            )}
+            {step === 'profile' && (
+              <motion.div key="pr" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <p className="text-amber-600 font-black text-[10px] uppercase tracking-[0.4em] mb-6">Data Sync</p>
+                <h2 className="text-7xl font-black text-slate-900 leading-[0.88] tracking-tighter mb-8 italic">
+                  CREATE<br />
+                  <span className="text-amber-500">PROFILE</span><br />
+                  IDENT.
+                </h2>
+                <p className="text-slate-500 text-lg font-bold leading-relaxed border-l-4 border-amber-600 pl-8">
+                  Initialize your personal node parameters to synchronize with the fleet.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { icon: ShieldCheck, label: 'Secure Encryption', color: 'text-indigo-600' },
+              { icon: Star, label: 'Premium Fleet', color: 'text-amber-500' },
+              { icon: Sparkles, label: 'Verified Matrix', color: 'text-emerald-500' },
+              { icon: CheckCircle2, label: 'SOS Protocol', color: 'text-rose-500' },
+            ].map(({ icon: Icon, label, color }) => (
+              <div key={label} className="bg-white rounded-[2rem] p-6 flex items-center gap-4 shadow-xl shadow-indigo-100/20 border border-slate-50">
+                <div className={`w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center`}>
+                   <Icon className={`w-6 h-6 ${color}`} />
+                </div>
+                <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest leading-tight">{label}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Right – Interactive Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="w-full max-w-md"
+        >
+          <div className="bg-white rounded-[3rem] p-8 sm:p-12 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.06)] border border-white">
+
+            <StepDots step={step} />
+
+            <AnimatePresence mode="wait">
+
+              {/* ── STEP 1: Entrance ── */}
+              {step === 'phone' && (
+                <motion.div
+                  key="phone"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="mb-10">
+                    <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-3">Entrance.</h3>
+                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Initialize your secure passenger link.</p>
+                  </div>
+
+                  <form onSubmit={handleSendOtp} className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Mobile Access</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-6 pointer-events-none gap-3">
+                          <span className="text-sm font-black text-slate-400">+91</span>
+                          <div className="w-[1.5px] h-4 bg-slate-200" />
+                          <Phone className="w-4 h-4 text-slate-300" />
+                        </div>
+                        <input
+                          type="tel" required disabled={isLoading}
+                          value={phoneNumber}
+                          onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                          placeholder="98765 43210"
+                          className={`${inputCls} pl-24`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Email Node</label>
+                      <div className="relative">
+                        <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+                        <input
+                          type="email" required disabled={isLoading}
+                          value={email}
+                          onChange={e => setEmail(e.target.value)}
+                          placeholder="you@matrix.io"
+                          className={`${inputCls} pl-14`}
+                        />
+                      </div>
+                    </div>
+
+                    <motion.button
+                      type="submit"
+                      disabled={isLoading || phoneNumber.length < 10 || !email.includes('@')}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full mt-4 bg-slate-900 hover:bg-indigo-600 disabled:opacity-40 disabled:pointer-events-none text-white py-5 rounded-[2rem] font-black text-sm flex items-center justify-center gap-4 shadow-2xl shadow-indigo-100 transition-all no-tap-highlight"
+                    >
+                      {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                        <>
+                          <span className="uppercase tracking-[0.2em] text-xs">Request Access Key</span>
+                          <ArrowRight className="w-5 h-5" />
+                        </>
+                      )}
+                    </motion.button>
+
+                    <p className="text-center text-[9px] text-slate-400 font-bold uppercase tracking-widest pt-2">
+                      By accessing, you accept the <span className="text-indigo-600 cursor-pointer">Protocol Terms</span>.
+                    </p>
+                  </form>
+                </motion.div>
+              )}
+
+              {/* ── STEP 2: Auth ── */}
+              {step === 'otp' && (
+                <motion.div
+                  key="otp"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <button
+                    onClick={() => setStep('phone')}
+                    className="mb-8 flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-all text-xs font-black uppercase tracking-widest"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Roll Back</span>
+                  </button>
+
+                  <div className="mb-10">
+                    <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-3">Authorize.</h3>
+                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">
+                       Key sent to <span className="text-emerald-500">{email}</span>
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleVerifyOtp} className="space-y-10">
+                    <OtpInput value={otp} onChange={setOtp} />
+
+                    <motion.button
+                      type="submit"
+                      disabled={isLoading || otp.length < 6}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:pointer-events-none text-white py-5 rounded-[2rem] font-black text-sm flex items-center justify-center gap-4 shadow-2xl shadow-emerald-100 transition-all"
+                    >
+                      {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                        <>
+                          <span className="uppercase tracking-[0.2em] text-xs">Confirm Identity</span>
+                          <CheckCircle2 className="w-5 h-5" />
+                        </>
+                      )}
+                    </motion.button>
+
+                    <div className="text-center">
+                      {timer > 0 ? (
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                          Refresh key in <span className="text-indigo-600">{timer}s</span>
+                        </p>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleSendOtp}
+                          className="text-[10px] text-indigo-600 hover:text-indigo-700 font-black uppercase tracking-[0.3em] flex items-center gap-3 mx-auto transition-all"
+                        >
+                          <RefreshCw className="w-4 h-4" /> Resend Transmission
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </motion.div>
+              )}
+
+              {/* ── STEP 3: Ident ── */}
+              {step === 'profile' && (
+                <motion.div
+                  key="profile"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="mb-10">
+                    <div className="w-16 h-16 bg-amber-50 rounded-[1.5rem] flex items-center justify-center mb-6 border border-amber-100">
+                      <Sparkles className="w-8 h-8 text-amber-500" />
+                    </div>
+                    <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-3">Establish.</h3>
+                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Define your node parameters.</p>
+                  </div>
+
+                  <form onSubmit={handleCompleteProfile} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">First Code</label>
+                        <div className="relative">
+                          <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+                          <input
+                            type="text" required
+                            value={firstname}
+                            onChange={e => setFirstname(e.target.value)}
+                            placeholder="Rahul"
+                            className={`${inputCls} pl-12`}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Last Code</label>
+                        <input
+                          type="text"
+                          value={lastname}
+                          onChange={e => setLastname(e.target.value)}
+                          placeholder="Sharma"
+                          className={inputCls}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Gender Node</label>
+                      <div className="flex gap-3">
+                        {['male', 'female', 'others'].map(g => (
+                          <motion.button
+                            key={g} type="button"
+                            whileTap={{ scale: 0.96 }}
+                            onClick={() => setGender(g)}
+                            className={`flex-1 py-4 rounded-2xl font-black text-[9px] uppercase tracking-widest transition-all border-2 ${gender === g
+                                ? 'bg-amber-600 border-amber-600 text-white shadow-xl shadow-amber-100'
+                                : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-100'
+                              }`}
+                          >
+                            {g}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Uplink Code (Opt)</label>
+                      <div className="relative">
+                        <Sparkles className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-300 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={referredByCode}
+                          onChange={e => setReferredByCode(e.target.value.toUpperCase())}
+                          placeholder="SYNC-CODE"
+                          className={`${inputCls} pl-14 uppercase`}
+                        />
+                      </div>
+                    </div>
+
+                    <motion.button
+                      type="submit"
+                      disabled={isLoading}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full mt-4 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:pointer-events-none text-white py-5 rounded-[2rem] font-black text-sm flex items-center justify-center gap-4 shadow-2xl shadow-amber-100 transition-all"
+                    >
+                      {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                        <>
+                          <span className="uppercase tracking-[0.2em] text-xs">Initialize Link</span>
+                          <Star className="w-5 h-5 fill-current" />
+                        </>
+                      )}
+                    </motion.button>
+                  </form>
+                </motion.div>
+              )}
+
+            </AnimatePresence>
+          </div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-center mt-8 text-[10px] font-black uppercase tracking-widest text-slate-400"
+          >
+            Drive with the fleet?{' '}
+            <Link href="/captain-login" className="text-indigo-600 hover:text-indigo-700 transition-colors">
+              Apply Membership →
+            </Link>
+          </motion.p>
+        </motion.div>
+      </div>
+
+      <div className="relative z-10 text-center pb-10 text-[9px] text-slate-300 font-black uppercase tracking-[0.4em]">
+        © 2026 YatraRide · Encrypted Core
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;

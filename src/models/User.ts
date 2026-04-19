@@ -6,7 +6,6 @@ const userSchema = new Schema({
     fullname: {
         firstname: {
             type: String,
-            required: true,
             minlength: [3, 'First name must be at least 3 characters long'],
         },
         lastname: {
@@ -14,16 +13,29 @@ const userSchema = new Schema({
             minlength: [3, 'Last name must be at least 3 characters long'],
         }
     },
+    phone: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
     email: {
         type: String,
-        required: true,
         unique: true,
+        sparse: true,
         minlength: [5, 'Email must be at least 5 characters long'],
     },
     password: {
         type: String,
-        required: true,
         select: false,
+    },
+    firebaseUid: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
+    isProfileComplete: {
+        type: Boolean,
+        default: false,
     },
     socketId: {
         type: String,
@@ -38,8 +50,7 @@ const userSchema = new Schema({
     },
     gender: {
         type: String,
-        enum: ['male', 'female', 'other'],
-        required: true,
+        enum: ['male', 'female', 'others'],
     },
     isBlocked: {
         type: Boolean,
@@ -53,6 +64,18 @@ const userSchema = new Schema({
     referredBy: {
         type: String
     },
+    freeRides: {
+        type: Number,
+        default: 0
+    },
+    firstRideCompleted: {
+        type: Boolean,
+        default: false
+    },
+    profileImage: {
+        type: String,
+        default: ''
+    },
     role: {
         type: String,
         enum: ['user', 'admin'],
@@ -61,7 +84,7 @@ const userSchema = new Schema({
 }, { timestamps: true });
 
 userSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET!, { expiresIn: '24h' });
+    const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET!, { expiresIn: '5d' });
     return token;
 };
 
