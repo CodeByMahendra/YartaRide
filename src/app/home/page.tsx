@@ -64,7 +64,7 @@ const Home = () => {
                 .then(response => {
                     setUser(response.data.user);
                 })
-                .catch(err => {
+                .catch((err: any) => {
                     console.error('Error fetching user profile:', err);
                     if (err.response?.status === 401) {
                         localStorage.removeItem('token');

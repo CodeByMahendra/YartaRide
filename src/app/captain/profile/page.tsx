@@ -34,7 +34,7 @@ export default function CaptainProfilePage() {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     if (statsRes.data.stats) setStats(statsRes.data.stats);
-                } catch (err) {
+                } catch (err: any) {
                     console.error("Session restore failed:", err);
                     if (err.response?.status === 401) {
                         localStorage.removeItem('token');

@@ -31,7 +31,7 @@ export default function ProfilePage() {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     setStats(statsRes.data.stats);
-                } catch (err) {
+                } catch (err: any) {
                     console.error("Session restore failed:", err);
                 }
             }

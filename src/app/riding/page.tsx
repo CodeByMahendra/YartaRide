@@ -31,7 +31,7 @@ const RidingContent = () => {
                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             setRide(res.data);
-         } catch (err) {
+         } catch (err: any) {
             console.error("Error fetching ride:", err);
          }
       };

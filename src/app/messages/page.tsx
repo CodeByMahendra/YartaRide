@@ -52,7 +52,7 @@ const ChatPage = () => {
           }
         }
         await fetchConversations(userData);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Auth error", err);
       }
     };
@@ -147,7 +147,7 @@ const ChatPage = () => {
       fetchConversations(currentUser);
 
       if (socket) socket.emit('message', newMsg);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Send failed", err);
       showToast("Failed to send transmission", "error");
     }
