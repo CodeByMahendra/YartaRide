@@ -23,8 +23,8 @@ export async function GET(request: Request) {
             $or: [{ sender: userId }, { receiver: userId }]
         })
             .sort({ createdAt: 1 }) // Chronological order (oldest first)
-            .populate('sender', 'fullname')
-            .populate('receiver', 'fullname');
+            .populate('sender', 'fullname profileImage')
+            .populate('receiver', 'fullname profileImage');
 
         // Group messages by conversation partner
         const conversationsMap: any = {};
@@ -33,12 +33,14 @@ export async function GET(request: Request) {
             const partnerId = msg.sender._id.toString() === userId ? msg.receiver._id.toString() : msg.sender._id.toString();
             const partnerName = msg.sender._id.toString() === userId ? msg.receiver.fullname : msg.sender.fullname;
             const partnerType = msg.sender._id.toString() === userId ? msg.receiverModel : msg.senderModel;
+            const partnerProfileImage = msg.sender._id.toString() === userId ? msg.receiver.profileImage : msg.sender.profileImage;
 
             // In ascending order, the last message processed for a partner will be the latest one
             conversationsMap[partnerId] = {
                 partnerId,
                 partnerName,
                 partnerType,
+                partnerProfileImage,
                 lastMessage: msg.contentType && msg.contentType !== 'text' ? `[${msg.contentType.toUpperCase()}]` : msg.content,
                 lastMessageTime: msg.createdAt,
                 messages: conversationsMap[partnerId] ? [...conversationsMap[partnerId].messages, msg] : [msg]

@@ -98,6 +98,10 @@ const captainSchema = new Schema({
     },
     referredBy: {
         type: String
+    },
+    profileImage: {
+        type: String,
+        default: ''
     }
 }, { timestamps: true });
 
