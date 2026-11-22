@@ -157,7 +157,7 @@ const LoginPage = () => {
     } finally { setIsLoading(false); }
   };
 
-  const inputCls = "w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-slate-900 font-bold text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all placeholder:text-slate-400 no-tap-highlight shadow-inner";
+  const inputCls = "w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition-all placeholder:text-slate-400";
 
   return (
     <div className="min-h-dvh w-full bg-slate-50 font-sans overflow-x-hidden relative flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
@@ -170,16 +170,16 @@ const LoginPage = () => {
       </div>
 
       {/* ── Top Bar ── */}
-      <header className="relative z-10 flex items-center justify-between px-5 sm:px-12 py-8 sm:py-12">
+      <header className="relative z-10 flex items-center justify-between px-5 py-4 sm:py-6">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-3"
+          className="flex items-center gap-2"
         >
-          <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-200">
-            <Navigation className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+            <Navigation className="w-4 h-4 text-white" />
           </div>
-          <span className="text-2xl font-black text-slate-900 tracking-tighter">
+          <span className="text-lg font-black text-slate-900 tracking-tight">
             Yatra<span className="text-indigo-600">Ride</span>
           </span>
         </motion.div>
@@ -190,7 +190,7 @@ const LoginPage = () => {
         >
           <Link
             href="/captain-login"
-            className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-indigo-600 transition-all border-2 border-slate-100 bg-white px-6 py-3 rounded-full shadow-sm"
+            className="text-xs font-semibold text-slate-600 hover:text-indigo-600 transition-all border border-slate-200 bg-white px-4 py-2 rounded-full shadow-sm"
           >
             Captain Login
           </Link>
@@ -198,7 +198,7 @@ const LoginPage = () => {
       </header>
 
       {/* ── Main Content ── */}
-      <div className="relative z-10 flex flex-col lg:flex-row flex-1 items-center justify-center gap-12 lg:gap-24 px-5 sm:px-8 py-8 sm:py-12 max-w-7xl mx-auto w-full">
+      <div className="relative z-10 flex flex-col lg:flex-row flex-1 items-center justify-center gap-8 lg:gap-24 px-4 sm:px-8 py-4 max-w-7xl mx-auto w-full">
 
         {/* Left – Brand Panel */}
         <motion.div
@@ -273,7 +273,7 @@ const LoginPage = () => {
           transition={{ delay: 0.15 }}
           className="w-full max-w-md"
         >
-          <div className="bg-white rounded-[3rem] p-8 sm:p-12 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.06)] border border-white">
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100">
 
             <StepDots step={step} />
 
@@ -288,19 +288,19 @@ const LoginPage = () => {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.25 }}
                 >
-                  <div className="mb-10">
-                    <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-3">Entrance.</h3>
-                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Initialize your secure passenger link.</p>
+                  <div className="mb-6">
+                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">Welcome back</h3>
+                    <p className="text-slate-400 text-sm">Enter your phone & email to get started.</p>
                   </div>
 
-                  <form onSubmit={handleSendOtp} className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Mobile Access</label>
+                  <form onSubmit={handleSendOtp} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-500 ml-1">Mobile Number</label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-6 pointer-events-none gap-3">
-                          <span className="text-sm font-black text-slate-400">+91</span>
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none gap-2">
+                          <span className="text-sm font-semibold text-slate-500">+91</span>
                           <div className="w-[1.5px] h-4 bg-slate-200" />
-                          <Phone className="w-4 h-4 text-slate-300" />
+                          <Phone className="w-3.5 h-3.5 text-slate-300" />
                         </div>
                         <input
                           type="tel" required disabled={isLoading}
@@ -312,16 +312,16 @@ const LoginPage = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Email Node</label>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-500 ml-1">Email Address</label>
                       <div className="relative">
-                        <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
                         <input
                           type="email" required disabled={isLoading}
                           value={email}
                           onChange={e => setEmail(e.target.value)}
-                          placeholder="you@matrix.io"
-                          className={`${inputCls} pl-14`}
+                          placeholder="you@example.com"
+                          className={`${inputCls} pl-10`}
                         />
                       </div>
                     </div>
@@ -329,20 +329,19 @@ const LoginPage = () => {
                     <motion.button
                       type="submit"
                       disabled={isLoading || phoneNumber.length < 10 || !email.includes('@')}
-                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full mt-4 bg-slate-900 hover:bg-indigo-600 disabled:opacity-40 disabled:pointer-events-none text-white py-5 rounded-[2rem] font-black text-sm flex items-center justify-center gap-4 shadow-2xl shadow-indigo-100 transition-all no-tap-highlight"
+                      className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 transition-all"
                     >
-                      {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                      {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                         <>
-                          <span className="uppercase tracking-[0.2em] text-xs">Request Access Key</span>
-                          <ArrowRight className="w-5 h-5" />
+                          <span>Send OTP</span>
+                          <ArrowRight className="w-4 h-4" />
                         </>
                       )}
                     </motion.button>
 
-                    <p className="text-center text-[9px] text-slate-400 font-bold uppercase tracking-widest pt-2">
-                      By accessing, you accept the <span className="text-indigo-600 cursor-pointer">Protocol Terms</span>.
+                    <p className="text-center text-xs text-slate-400 pt-1">
+                      By continuing, you accept our <span className="text-indigo-600 cursor-pointer">Terms of Service</span>.
                     </p>
                   </form>
                 </motion.div>
@@ -365,43 +364,42 @@ const LoginPage = () => {
                     <span>Roll Back</span>
                   </button>
 
-                  <div className="mb-10">
-                    <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-3">Authorize.</h3>
-                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">
-                       Key sent to <span className="text-emerald-500">{email}</span>
+                  <div className="mb-6">
+                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">Verify OTP</h3>
+                    <p className="text-slate-400 text-sm">
+                      Code sent to <span className="text-emerald-500 font-semibold">{email}</span>
                     </p>
                   </div>
 
-                  <form onSubmit={handleVerifyOtp} className="space-y-10">
+                  <form onSubmit={handleVerifyOtp} className="space-y-6">
                     <OtpInput value={otp} onChange={setOtp} />
 
                     <motion.button
                       type="submit"
                       disabled={isLoading || otp.length < 6}
-                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:pointer-events-none text-white py-5 rounded-[2rem] font-black text-sm flex items-center justify-center gap-4 shadow-2xl shadow-emerald-100 transition-all"
+                      className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:pointer-events-none text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-100 transition-all"
                     >
-                      {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                      {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                         <>
-                          <span className="uppercase tracking-[0.2em] text-xs">Confirm Identity</span>
-                          <CheckCircle2 className="w-5 h-5" />
+                          <span>Verify & Continue</span>
+                          <CheckCircle2 className="w-4 h-4" />
                         </>
                       )}
                     </motion.button>
 
                     <div className="text-center">
                       {timer > 0 ? (
-                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
-                          Refresh key in <span className="text-indigo-600">{timer}s</span>
+                        <p className="text-xs text-slate-400">
+                          Resend in <span className="text-indigo-600 font-semibold">{timer}s</span>
                         </p>
                       ) : (
                         <button
                           type="button"
                           onClick={handleSendOtp}
-                          className="text-[10px] text-indigo-600 hover:text-indigo-700 font-black uppercase tracking-[0.3em] flex items-center gap-3 mx-auto transition-all"
+                          className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold flex items-center gap-2 mx-auto transition-all"
                         >
-                          <RefreshCw className="w-4 h-4" /> Resend Transmission
+                          <RefreshCw className="w-3.5 h-3.5" /> Resend OTP
                         </button>
                       )}
                     </div>
@@ -418,31 +416,31 @@ const LoginPage = () => {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.25 }}
                 >
-                  <div className="mb-10">
-                    <div className="w-16 h-16 bg-amber-50 rounded-[1.5rem] flex items-center justify-center mb-6 border border-amber-100">
-                      <Sparkles className="w-8 h-8 text-amber-500" />
+                  <div className="mb-6">
+                    <div className="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center mb-4 border border-amber-100">
+                      <Sparkles className="w-5 h-5 text-amber-500" />
                     </div>
-                    <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-3">Establish.</h3>
-                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Define your node parameters.</p>
+                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">Complete Profile</h3>
+                    <p className="text-slate-400 text-sm">Almost there! Tell us about yourself.</p>
                   </div>
 
-                  <form onSubmit={handleCompleteProfile} className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">First Code</label>
+                  <form onSubmit={handleCompleteProfile} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-500 ml-1">First Name</label>
                         <div className="relative">
-                          <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+                          <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
                           <input
                             type="text" required
                             value={firstname}
                             onChange={e => setFirstname(e.target.value)}
                             placeholder="Rahul"
-                            className={`${inputCls} pl-12`}
+                            className={`${inputCls} pl-9`}
                           />
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Last Code</label>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-500 ml-1">Last Name</label>
                         <input
                           type="text"
                           value={lastname}
@@ -453,17 +451,17 @@ const LoginPage = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Gender Node</label>
-                      <div className="flex gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-500 ml-1">Gender</label>
+                      <div className="flex gap-2">
                         {['male', 'female', 'others'].map(g => (
                           <motion.button
                             key={g} type="button"
                             whileTap={{ scale: 0.96 }}
                             onClick={() => setGender(g)}
-                            className={`flex-1 py-4 rounded-2xl font-black text-[9px] uppercase tracking-widest transition-all border-2 ${gender === g
-                                ? 'bg-amber-600 border-amber-600 text-white shadow-xl shadow-amber-100'
-                                : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-100'
+                            className={`flex-1 py-2.5 rounded-xl font-semibold text-xs capitalize transition-all border ${gender === g
+                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-100'
+                                : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-200'
                               }`}
                           >
                             {g}
@@ -472,16 +470,16 @@ const LoginPage = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Uplink Code (Opt)</label>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-500 ml-1">Referral Code (Optional)</label>
                       <div className="relative">
-                        <Sparkles className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-300 pointer-events-none" />
+                        <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-300 pointer-events-none" />
                         <input
                           type="text"
                           value={referredByCode}
                           onChange={e => setReferredByCode(e.target.value.toUpperCase())}
-                          placeholder="SYNC-CODE"
-                          className={`${inputCls} pl-14 uppercase`}
+                          placeholder="Enter code"
+                          className={`${inputCls} pl-9 uppercase`}
                         />
                       </div>
                     </div>
@@ -489,14 +487,13 @@ const LoginPage = () => {
                     <motion.button
                       type="submit"
                       disabled={isLoading}
-                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full mt-4 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:pointer-events-none text-white py-5 rounded-[2rem] font-black text-sm flex items-center justify-center gap-4 shadow-2xl shadow-amber-100 transition-all"
+                      className="w-full mt-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:pointer-events-none text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-100 transition-all"
                     >
-                      {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                      {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                         <>
-                          <span className="uppercase tracking-[0.2em] text-xs">Initialize Link</span>
-                          <Star className="w-5 h-5 fill-current" />
+                          <span>Complete Setup</span>
+                          <Star className="w-4 h-4 fill-current" />
                         </>
                       )}
                     </motion.button>

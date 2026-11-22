@@ -91,6 +91,7 @@ export async function createRide({
         },
         otp: generateOtp(4),
         fare: (fareData.fares as any)[vehicleType],
+        vehicleType, // Save selected vehicle type
         passUsed: !!activePass,
         isFemaleOnly: isFemaleOnly || false,
         waitAtDestination: waitAtDestination || false
@@ -125,8 +126,13 @@ export async function startRide({ rideId, otp, captainId }: { rideId: string, ot
     if (ride.status !== 'accepted') throw new Error('Ride not accepted');
     if (ride.otp !== otp) throw new Error('Invalid OTP');
 
-    await Ride.findOneAndUpdate({ _id: rideId }, { status: 'ongoing' });
-    return ride;
+    // Update status and return the updated document
+    const updatedRide = await Ride.findOneAndUpdate(
+        { _id: rideId },
+        { status: 'ongoing' },
+        { new: true }
+    ).populate('user').populate('captain').select('+otp');
+    return updatedRide;
 }
 
 export async function endRide({ rideId, captainId }: { rideId: string, captainId: string }) {

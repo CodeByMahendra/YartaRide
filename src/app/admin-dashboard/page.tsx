@@ -4,33 +4,53 @@ import axios from 'axios';
 import {
     Users, Car, Navigation, Wallet, Settings,
     Bell, Search, LayoutDashboard, ShieldAlert, LogOut,
-    ArrowRight, CheckCircle2
+    ArrowRight, CheckCircle2, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 const AdminDashboard = () => {
     const [realStats, setRealStats] = useState<any>(null);
     const [recentRides, setRecentRides] = useState<any[]>([]);
     const [pendingCaptains, setPendingCaptains] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedCaptain, setSelectedCaptain] = useState<any>(null);
+
+    const fetchStats = async () => {
+        try {
+            const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+            const response = await axios.get('/api/admin/stats', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setRealStats(response.data.stats);
+            setRecentRides(response.data.recentRides);
+            setPendingCaptains(response.data.pendingCaptains);
+        } catch (error) {
+            console.error("Error fetching admin stats:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const response = await axios.get('/api/admin/stats', {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                });
-                setRealStats(response.data.stats);
-                setRecentRides(response.data.recentRides);
-                setPendingCaptains(response.data.pendingCaptains);
-            } catch (error) {
-                console.error("Error fetching admin stats:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchStats();
     }, []);
+
+    const handleVerifyCaptain = async (captainId: string, status: 'active' | 'inactive') => {
+        try {
+            const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+            const response = await axios.post('/api/admin/verify-captain', 
+                { captainId, status },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.status === 200) {
+                setPendingCaptains(prev => prev.filter(c => c._id !== captainId));
+                fetchStats();
+            }
+        } catch (error) {
+            console.error("Error verifying captain:", error);
+        }
+    };
 
     const stats = [
         { label: "Total Revenue", val: realStats ? `₹${realStats.totalRevenue.toLocaleString()}` : "₹0", change: "+0%", icon: Wallet, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
@@ -141,11 +161,11 @@ const AdminDashboard = () => {
                                 <Bell className="w-6 h-6" />
                                 <span className="absolute top-4 right-4 w-2.5 h-2.5 bg-rose-500 rounded-full border-4 border-[#06080c]"></span>
                             </button>
-                            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 p-0.5 shadow-2xl shadow-indigo-500/20">
+                            <Link href="/user/profile" className="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 p-0.5 shadow-2xl shadow-indigo-500/20 block hover:scale-105 active:scale-95 transition-all">
                                 <div className="w-full h-full bg-[#06080c] rounded-[0.9rem] flex items-center justify-center text-white font-black text-sm tracking-tighter">
                                     AD
                                 </div>
-                            </div>
+                            </Link>
                         </div>
                     </div>
                 </header>
@@ -228,18 +248,31 @@ const AdminDashboard = () => {
                                 <div className="space-y-6 flex-1 max-h-[600px] overflow-y-auto no-scrollbar">
                                     {pendingCaptains.map((cap, idx) => (
                                         <div key={idx} className="bg-white/[0.03] p-6 rounded-[2.5rem] border border-white/5 hover:border-indigo-500/30 transition-all">
-                                            <div className="flex items-start gap-4 mb-6">
-                                                <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center font-black text-indigo-400 border border-white/5">
+                                            <div 
+                                                onClick={() => setSelectedCaptain(cap)}
+                                                className="flex items-start gap-4 mb-6 cursor-pointer group/item"
+                                            >
+                                                <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center font-black text-indigo-400 border border-white/5 group-hover/item:border-indigo-500 transition-colors">
                                                     {cap.fullname?.firstname[0]}
                                                 </div>
                                                 <div>
-                                                    <h5 className="text-base font-black text-white leading-none mb-1">{cap.fullname?.firstname} {cap.fullname?.lastname}</h5>
+                                                    <h5 className="text-base font-black text-white leading-none mb-1 group-hover/item:text-indigo-400 transition-colors">{cap.fullname?.firstname} {cap.fullname?.lastname}</h5>
                                                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">{cap.vehicle?.color} {cap.vehicle?.vehicleType} • {cap.vehicle?.plate}</p>
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-2 gap-3">
-                                                <button className="py-4 bg-emerald-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-500/10">Approve</button>
-                                                <button className="py-4 bg-white/5 text-rose-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-500/10 transition-all border border-white/5">Decline</button>
+                                                <button 
+                                                    onClick={() => handleVerifyCaptain(cap._id, 'active')}
+                                                    className="py-4 bg-emerald-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-500/10"
+                                                >
+                                                    Approve
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleVerifyCaptain(cap._id, 'inactive')}
+                                                    className="py-4 bg-white/5 text-rose-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-500/10 transition-all border border-white/5"
+                                                >
+                                                    Decline
+                                                </button>
                                             </div>
                                         </div>
                                     ))}
@@ -258,6 +291,88 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Captain Detail Modal */}
+            <AnimatePresence>
+                {selectedCaptain && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[150] bg-black/75 backdrop-blur-md flex items-center justify-center p-6"
+                        onClick={() => setSelectedCaptain(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="bg-slate-900 border border-white/10 rounded-[3rem] p-10 max-w-md w-full shadow-2xl relative text-slate-300"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button 
+                                onClick={() => setSelectedCaptain(null)}
+                                className="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-slate-400 hover:text-white"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+
+                            <div className="flex flex-col items-center text-center">
+                                <div className="w-24 h-24 rounded-[2rem] bg-indigo-600/20 border border-white/20 p-1 mb-6 overflow-hidden flex items-center justify-center">
+                                    {selectedCaptain.profileImage ? (
+                                        <img src={selectedCaptain.profileImage} className="w-full h-full object-cover rounded-[1.8rem]" alt="Profile" />
+                                    ) : (
+                                        <div className="text-4xl font-black text-indigo-400">{selectedCaptain.fullname?.firstname[0]}</div>
+                                    )}
+                                </div>
+                                <h3 className="text-2xl font-black text-white leading-none mb-1">
+                                    {selectedCaptain.fullname?.firstname} {selectedCaptain.fullname?.lastname}
+                                </h3>
+                                <p className="text-indigo-400 font-bold text-[10px] uppercase tracking-widest mb-6">Captain Verification Details</p>
+
+                                <div className="w-full space-y-4 text-left bg-white/[0.02] border border-white/5 p-6 rounded-[2rem]">
+                                    <div>
+                                        <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest block mb-1">Phone Number</span>
+                                        <p className="text-sm font-bold text-white">{selectedCaptain.phone || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest block mb-1">Email Node</span>
+                                        <p className="text-sm font-bold text-white">{selectedCaptain.email || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest block mb-1">Vehicle Plate</span>
+                                        <p className="text-sm font-bold text-white uppercase">{selectedCaptain.vehicle?.plate || 'N/A'}</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest block mb-1">Vehicle Type</span>
+                                            <p className="text-sm font-bold text-indigo-400 uppercase">{selectedCaptain.vehicle?.vehicleType || 'N/A'}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest block mb-1">Color / Cap</span>
+                                            <p className="text-sm font-bold text-white capitalize">{selectedCaptain.vehicle?.color || 'N/A'} ({selectedCaptain.vehicle?.capacity || 1})</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 w-full mt-8">
+                                    <button 
+                                        onClick={() => { handleVerifyCaptain(selectedCaptain._id, 'active'); setSelectedCaptain(null); }}
+                                        className="py-4 bg-emerald-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-500/10"
+                                    >
+                                        Approve
+                                    </button>
+                                    <button 
+                                        onClick={() => { handleVerifyCaptain(selectedCaptain._id, 'inactive'); setSelectedCaptain(null); }}
+                                        className="py-4 bg-white/5 text-rose-400 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-rose-500/10 transition-all border border-white/5"
+                                    >
+                                        Decline
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Global Noise Overlay */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>

@@ -27,6 +27,10 @@ const rideSchema = new Schema({
         enum: ['private', 'shared'],
         default: 'private',
     },
+    vehicleType: {
+        type: String,
+        enum: ['car', 'moto', 'auto'],
+    },
     seatsRequired: {
         type: Number,
         default: 1,

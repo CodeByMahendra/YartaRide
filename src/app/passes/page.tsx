@@ -2,9 +2,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Ticket, Zap, ShieldCheck, Clock, Crown,
-    ArrowRight, Check, Sparkles, MapPin,
-    Calendar, ArrowLeft, Star, X
+    Ticket, Zap, Crown, ArrowRight, Check, Sparkles, MapPin,
+    ArrowLeft, X
 } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
@@ -21,40 +20,31 @@ const Passes = () => {
     const plans = [
         {
             id: 'basic',
-            name: 'Urban Lite',
+            name: 'Daily Commute',
             price: '₹299',
             validity: '15 Days',
-            perk: 'Fixed fare of ₹49 for first 5km',
+            perk: 'Flat fare of ₹49 for first 5 km on every ride',
             icon: Ticket,
-            color: 'bg-indigo-600',
-            bg: 'bg-indigo-500/10',
-            border: 'border-indigo-500/20',
-            text: 'text-indigo-400'
+            tag: 'Popular'
         },
         {
             id: 'pro',
-            name: 'Metro Pro',
+            name: 'City Pro',
             price: '₹599',
             validity: '30 Days',
-            perk: 'Fixed fare of ₹39 + No Surge Pricing',
+            perk: 'Flat fare of ₹39 + Zero surge pricing guaranteed',
             icon: Zap,
             featured: true,
-            color: 'bg-slate-800', // Featured button color
-            bg: 'bg-slate-800',
-            border: 'border-slate-700',
-            text: 'text-white'
+            tag: 'Best Value'
         },
         {
             id: 'elite',
-            name: 'Legend Elite',
-            price: '₹1299',
+            name: 'Unlimited Club',
+            price: '₹1,299',
             validity: '45 Days',
-            perk: 'Free rides up to 3km + Priority Captains',
+            perk: 'Free rides up to 3 km + Top rated captains priority',
             icon: Crown,
-            color: 'bg-amber-600',
-            bg: 'bg-amber-500/10',
-            border: 'border-amber-500/20',
-            text: 'text-amber-400'
+            tag: 'Premium'
         }
     ];
 
@@ -87,7 +77,7 @@ const Passes = () => {
                     setSuccessMsg('');
                     setPickup('');
                     setDestination('');
-                }, 3000);
+                }, 2500);
             }
         } catch (err: any) {
             setErrorMsg(err.response?.data?.message || 'Failed to activate pass');
@@ -97,187 +87,174 @@ const Passes = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 font-sans pb-20 relative">
-            {/* Immersive Header */}
-            <div className="relative h-[300px] md:h-[400px] bg-slate-900 flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 to-slate-950 opacity-80"></div>
-                <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-
-                {/* Back Link */}
-                <Link href="/home" className="absolute top-6 left-6 md:top-10 md:left-10 p-3 md:p-4 bg-slate-800/50 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-3xl text-white hover:bg-slate-800 transition-all z-10">
-                    <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
-                </Link>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="relative z-10 text-center px-8 mt-10"
-                >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.3em] border border-indigo-500/30 mb-8">
-                        <Sparkles className="w-3 h-3" /> Exclusive Memberships
+        <div className="min-h-screen bg-slate-50 font-sans pb-16">
+            {/* Header */}
+            <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
+                <div className="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Link href="/home" className="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors">
+                            <ArrowLeft className="w-5 h-5" />
+                        </Link>
+                        <div>
+                            <h1 className="text-lg font-bold text-slate-900 leading-tight">Yatra Passes</h1>
+                            <p className="text-xs text-slate-500">Save big on daily commute</p>
+                        </div>
                     </div>
-                    <h1 className="text-4xl md:text-8xl font-black text-white italic tracking-tighter mb-6 leading-none">
-                        Fly with <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-white to-indigo-200">Pass.</span>
-                    </h1>
-                    <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl mx-auto">
-                        Say goodbye to price fluctuations. Unlock fixed-rate journeys and elite privileges across the city.
+                </div>
+            </header>
+
+            <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+                {/* Banner */}
+                <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-2xl p-6 shadow-sm">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-semibold mb-2">
+                        <Sparkles className="w-3.5 h-3.5" /> Fixed Fare Passes
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">Save up to 40% every month</h2>
+                    <p className="text-xs sm:text-sm text-indigo-100 mt-1 max-w-lg">
+                        Lock in discounted rates for your regular office or college routes with zero surge pricing.
                     </p>
-                </motion.div>
-            </div>
+                </div>
 
-            {/* Passes Selection */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-20 md:-mt-24 relative z-20">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                    {plans.map((plan, idx) => (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.1 }}
+                {/* Plans Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {plans.map((plan) => (
+                        <div
                             key={plan.id}
-                            className={`group relative bg-slate-900 p-8 md:p-12 rounded-[2.5rem] md:rounded-[4rem] border ${plan.featured ? 'border-indigo-500 ring-4 ring-indigo-500/20 shadow-2xl shadow-indigo-500/10' : 'border-slate-800'} shadow-xl hover:shadow-2xl transition-all flex flex-col`}
+                            className={`bg-white rounded-2xl border p-5 flex flex-col justify-between transition-all ${
+                                plan.featured
+                                    ? 'border-indigo-600 shadow-md ring-2 ring-indigo-100'
+                                    : 'border-slate-200/80 shadow-sm hover:border-slate-300'
+                            }`}
                         >
-                            {plan.featured && (
-                                <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-8 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] shadow-xl shadow-indigo-600/40">
-                                    Recommended
-                                </div>
-                            )}
-
-                            <div className={`${plan.bg} ${plan.text} w-20 h-20 rounded-[2.5rem] flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-500 border ${plan.border}`}>
-                                <plan.icon className="w-10 h-10" />
-                            </div>
-
-                            <h3 className="text-3xl font-black text-white tracking-tighter mb-2">{plan.name}</h3>
-                            <div className="flex items-baseline gap-2 mb-10">
-                                <span className="text-4xl font-black text-white italic tracking-tighter">{plan.price}</span>
-                                <span className="text-slate-500 font-bold text-xs uppercase tracking-widest">{plan.validity}</span>
-                            </div>
-
-                            <div className="space-y-6 flex-1 mb-12">
-                                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Subscription Privilege</h5>
-                                <div className="flex items-start gap-4">
-                                    <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-500/20">
-                                        <Check className="w-4 h-4" />
+                            <div>
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                        <plan.icon className="w-5 h-5" />
                                     </div>
-                                    <p className="text-sm font-black text-slate-300 leading-tight">
-                                        {plan.perk}
-                                    </p>
+                                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                                        plan.featured ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
+                                    }`}>
+                                        {plan.tag}
+                                    </span>
                                 </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-500/20">
-                                        <Check className="w-4 h-4" />
+
+                                <h3 className="text-base font-bold text-slate-900">{plan.name}</h3>
+                                <div className="flex items-baseline gap-1 mt-1 mb-3">
+                                    <span className="text-2xl font-black text-slate-900">{plan.price}</span>
+                                    <span className="text-xs text-slate-500 font-medium">/ {plan.validity}</span>
+                                </div>
+
+                                <div className="space-y-2 text-xs text-slate-600 py-3 border-t border-slate-100">
+                                    <div className="flex items-start gap-2">
+                                        <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                        <span>{plan.perk}</span>
                                     </div>
-                                    <p className="text-sm font-black text-slate-300 leading-tight">
-                                        Surge-Free Travel 24/7
-                                    </p>
+                                    <div className="flex items-start gap-2">
+                                        <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                        <span>Zero surge pricing during peak hours</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <button onClick={() => setSelectedPlan(plan.id)} className={`w-full py-6 ${plan.featured ? 'bg-gradient-to-r from-indigo-600 to-indigo-700' : 'bg-slate-800'} text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs hover:scale-[1.02] transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 border border-white/5`}>
-                                Activate Pass <ArrowRight className="w-4 h-4" />
+                            <button
+                                onClick={() => setSelectedPlan(plan.id)}
+                                className={`w-full mt-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                                    plan.featured
+                                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'
+                                        : 'bg-slate-900 hover:bg-slate-800 text-white'
+                                }`}
+                            >
+                                <span>Get Pass</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
                             </button>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
 
-                {/* FAQ / Info Section */}
-                <div className="mt-24 bg-slate-900 rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 border border-indigo-500/10 flex flex-col md:flex-row gap-12 items-center shadow-2xl shadow-black/20">
-                    <div className="flex-1">
-                        <h4 className="text-3xl font-black text-white tracking-tighter mb-4 italic">How it works.</h4>
-                        <p className="text-slate-400 leading-relaxed font-medium">Once a pass is active, the discount applies automatically to your rides. Simply request a ride to your destination and watch the pricing update in real-time. No manual input needed.</p>
-                    </div>
-                    <div className="flex gap-4">
-                        <div className="text-center p-8 bg-slate-950 rounded-[3rem] border border-slate-800 w-40">
-                            <h5 className="text-4xl font-black text-white tracking-tighter mb-1">12k+</h5>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Members</p>
-                        </div>
-                        <div className="text-center p-8 bg-slate-950 rounded-[3rem] border border-slate-800 w-40">
-                            <h5 className="text-4xl font-black text-white tracking-tighter mb-1">98%</h5>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Savings Score</p>
-                        </div>
-                    </div>
+                {/* FAQ */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+                    <h4 className="text-sm font-bold text-slate-900 mb-2">How do Yatra Passes work?</h4>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                        Once purchased, the pass automatically applies to your booked rides matching your route. No coupon codes required at checkout.
+                    </p>
                 </div>
             </div>
 
+            {/* Modal for Route Setup */}
             <AnimatePresence>
                 {selectedPlan && (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-                    >
-                        <motion.div 
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.9, y: 20 }}
-                            className="bg-slate-900 border border-slate-800 p-8 rounded-[3rem] w-full max-w-md shadow-2xl"
-                        >
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-2xl font-black text-white tracking-tighter inline-flex items-center gap-2">
-                                    <MapPin className="w-6 h-6 text-indigo-500" />
-                                    Route Details
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+                        <div className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl border border-slate-200">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-indigo-600" />
+                                    Configure Route
                                 </h3>
-                                <button onClick={() => setSelectedPlan(null)} className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors">
+                                <button
+                                    onClick={() => setSelectedPlan(null)}
+                                    className="p-1 rounded-lg text-slate-400 hover:bg-slate-100"
+                                >
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
 
                             {successMsg ? (
-                                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl text-center font-bold">
+                                <div className="p-4 bg-emerald-50 text-emerald-700 rounded-xl text-center text-xs font-bold">
                                     {successMsg}
                                 </div>
                             ) : (
-                                <div className="space-y-4">
-                                    {errorMsg && <p className="text-red-400 text-sm font-bold text-center">{errorMsg}</p>}
-                                    
+                                <div className="space-y-3">
+                                    {errorMsg && (
+                                        <p className="text-rose-500 text-xs font-semibold">{errorMsg}</p>
+                                    )}
+
                                     <div>
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Pickup Location</label>
-                                        <input 
-                                            type="text" 
+                                        <label className="text-xs font-semibold text-slate-600">Pickup Location</label>
+                                        <input
+                                            type="text"
                                             value={pickup}
                                             onChange={(e) => setPickup(e.target.value)}
-                                            placeholder="Enter precise pickup address"
-                                            className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                                            placeholder="e.g. Home, Sector 62"
+                                            className="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 focus:bg-white focus:border-indigo-500 outline-none"
                                         />
                                     </div>
+
                                     <div>
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Drop Location</label>
-                                        <input 
-                                            type="text" 
+                                        <label className="text-xs font-semibold text-slate-600">Drop Location</label>
+                                        <input
+                                            type="text"
                                             value={destination}
                                             onChange={(e) => setDestination(e.target.value)}
-                                            placeholder="Enter precise destination"
-                                            className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                                            placeholder="e.g. Office, Cyber City"
+                                            className="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 focus:bg-white focus:border-indigo-500 outline-none"
                                         />
-                                        <p className="text-[10px] text-slate-500 mt-2 ml-2 leading-tight">Prices are locked for this exact route. Make sure spelling matches your usual ride searches.</p>
                                     </div>
+
                                     <div>
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Pass Type</label>
-                                        <select 
+                                        <label className="text-xs font-semibold text-slate-600">Pass Type</label>
+                                        <select
                                             value={type}
                                             onChange={(e) => setType(e.target.value)}
-                                            className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                                            className="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 focus:bg-white focus:border-indigo-500 outline-none"
                                         >
                                             <option value="student">Student Pass</option>
                                             <option value="office">Office Commute</option>
                                         </select>
                                     </div>
 
-                                    <button 
+                                    <button
                                         onClick={handleActivate}
                                         disabled={loading}
-                                        className="w-full py-5 mt-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
+                                        className="w-full py-2.5 mt-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-sm"
                                     >
-                                        {loading ? 'Processing...' : 'Confirm Activation'}
+                                        {loading ? 'Activating...' : 'Confirm & Pay'}
                                     </button>
                                 </div>
                             )}
-                        </motion.div>
-                    </motion.div>
+                        </div>
+                    </div>
                 )}
             </AnimatePresence>
-
-            <div className="absolute inset-0 z-[-1] opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
         </div>
     );
 };

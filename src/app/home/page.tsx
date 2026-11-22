@@ -302,11 +302,11 @@ const Home = () => {
                 <motion.div
                     initial={{ y: 200 }}
                     animate={{ y: 0 }}
-                    className='bg-white rounded-t-[3rem] md:rounded-[3.5rem] md:max-w-xl md:mx-auto md:mb-12 shadow-[0_-20px_50px_rgba(0,0,0,0.1)] border-t border-slate-100 px-8 pb-32 pt-8'
+                    className='bg-white rounded-t-[2rem] md:rounded-[3.5rem] md:max-w-xl md:mx-auto md:mb-12 shadow-[0_-20px_50px_rgba(0,0,0,0.1)] border-t border-slate-100 px-5 pb-28 pt-5'
                 >
-                    <div className="mb-8">
-                        <h4 className='text-3xl md:text-4xl font-black text-slate-900 tracking-tighter leading-tight'>Where to, {user?.fullname?.firstname || 'Friend'}?</h4>
-                        <p className="text-indigo-600 font-bold text-[9px] uppercase tracking-widest mt-2 flex items-center gap-2">
+                    <div className="mb-6">
+                        <h4 className='text-xl md:text-2xl font-bold text-slate-900 tracking-tight leading-tight'>Where to, {user?.fullname?.firstname || 'Friend'}?</h4>
+                        <p className="text-indigo-600 font-semibold text-[10px] uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
                            Smart Dispatch Active
                         </p>
@@ -322,31 +322,31 @@ const Home = () => {
 
                             <div 
                                 onClick={() => { setPanelOpen(true); setActiveField('pickup'); }}
-                                className="w-full pl-18 pr-6 py-5 bg-slate-50 border border-slate-100 rounded-3xl cursor-pointer hover:bg-white hover:shadow-lg transition-all"
+                                className="w-full pl-14 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl cursor-pointer hover:bg-white hover:shadow-md transition-all"
                             >
-                                <span className={`text-base font-bold truncate block ${pickup ? 'text-slate-900' : 'text-slate-400'}`}>
+                                <span className={`text-sm font-medium truncate block ${pickup ? 'text-slate-900' : 'text-slate-400'}`}>
                                     {pickup || 'Set current location'}
                                 </span>
                             </div>
 
-                            <div 
+                             <div 
                                 onClick={() => { setPanelOpen(true); setActiveField('destination'); }}
-                                className="w-full pl-18 pr-6 py-5 bg-slate-50 border border-slate-100 rounded-3xl cursor-pointer mt-3 hover:bg-white hover:shadow-lg transition-all"
+                                className="w-full pl-14 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl cursor-pointer mt-2 hover:bg-white hover:shadow-md transition-all"
                             >
-                                <span className={`text-base font-bold truncate block ${destination ? 'text-slate-900' : 'text-slate-400'}`}>
+                                <span className={`text-sm font-medium truncate block ${destination ? 'text-slate-900' : 'text-slate-400'}`}>
                                     {destination || 'Search destination'}
                                 </span>
                             </div>
                          </div>
                     </div>
 
-                    <div className="flex gap-3 mt-8 overflow-x-auto no-scrollbar pb-2">
+                    <div className="flex gap-2 mt-5 overflow-x-auto no-scrollbar pb-1">
                         {[
-                            { icon: MapPin, label: 'Add Work', col: 'text-indigo-600 bg-indigo-50' },
+                            { icon: MapPin, label: 'Work', col: 'text-indigo-600 bg-indigo-50' },
                             { icon: Star, label: 'Saved', col: 'text-amber-600 bg-amber-50' },
                             { icon: ArrowUp, label: 'Elevate', col: 'text-emerald-600 bg-emerald-50' }
                         ].map((s, i) => (
-                            <button key={i} className={`flex items-center gap-2 ${s.col} px-6 py-3 rounded-2xl whitespace-nowrap text-[10px] font-black uppercase tracking-widest border border-black/5`}>
+                            <button key={i} className={`flex items-center gap-1.5 ${s.col} px-4 py-2 rounded-xl whitespace-nowrap text-xs font-semibold border border-black/5`}>
                                 <s.icon className="w-3.5 h-3.5" /> {s.label}
                             </button>
                         ))}
